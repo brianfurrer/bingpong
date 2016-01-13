@@ -2240,7 +2240,7 @@ function verifyLogout(callbackOnSuccess, callbackOnFailure) {
 		} else { // not logged out, so attempt another logout
 			logoutOfAccount(callbackOnSuccess, callbackOnFailure);
 		}
-    });
+	});
 }
 
 function enableMobileMode(callback) { 
