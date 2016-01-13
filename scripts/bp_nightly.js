@@ -976,11 +976,11 @@ function parseTrendingSearchTerms(callback) {
 function getDashboardContents(callback) { 
 	performGETRequest("https://www.bing.com/rewards/dashboard", false, function (contents) {
 		// update the global dashboardData variable
-      	dashboardData = contents;
+		dashboardData = contents;
       			
-      	// return to caller
-      	callback();
-    });
+		// return to caller
+		callback();
+	});
 }
 
 function parseDashboardContents(callbackOnSuccess, callbackOnBadAccount) { 
@@ -989,43 +989,43 @@ function parseDashboardContents(callbackOnSuccess, callbackOnBadAccount) {
 		if (dashboardData.indexOf("up to 2 credits a day") != -1 || 
 		dashboardData.indexOf("For a limited time you're earning free credits.") != -1 ||
 		dashboardData.indexOf("This isn't a Bing Rewards account.") != -1) {
-            document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-           	document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-           	document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-            document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
+			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
             			
-            // continue with the next account
+			// continue with the next account
 			callbackOnBadAccount();
 			return;
-        }
+		}
             		
-        // get the number of credits required to max out the PC search credits for the day
-        if (dashboardData.indexOf("15 credits a day") != -1) { 
+		// get the number of credits required to max out the PC search credits for the day
+		if (dashboardData.indexOf("15 credits a day") != -1) { 
 			searchCountText = "15 credits a day";
-            creditsToGet = 15;
-        } else if (dashboardData.indexOf("20 credits a day") != -1) { 
-           	searchCountText = "20 credits a day";
-            creditsToGet = 20;
-        } else if (dashboardData.indexOf("30 credits a day") != -1) { 
+			creditsToGet = 15;
+		} else if (dashboardData.indexOf("20 credits a day") != -1) { 
+			searchCountText = "20 credits a day";
+			creditsToGet = 20;
+		} else if (dashboardData.indexOf("30 credits a day") != -1) { 
 			searchCountText = "30 credits a day";
-            creditsToGet = 30;
-        } else if (dashboardData.indexOf("60 credits a day") != -1) { 
-            searchCountText = "60 credits a day";
-            creditsToGet = 60;
-        } else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 75 credits") != -1) {
-            searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
-            creditsToGet = 75;
-        } else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 150 credits") != -1) {
-            searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
-            creditsToGet = 150;
+			creditsToGet = 30;
+		} else if (dashboardData.indexOf("60 credits a day") != -1) { 
+			searchCountText = "60 credits a day";
+			creditsToGet = 60;
+		} else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 75 credits") != -1) {
+			searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
+			creditsToGet = 75;
+		} else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 150 credits") != -1) {
+			searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
+			creditsToGet = 150;
 		} else { // fail account 
 			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-           	document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
 			document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
 			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
 			document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
@@ -1763,9 +1763,9 @@ function updateAccountManagerDisplay() {
 		 
 			// fetch the value of accountCount
 			accountCount = getCookie("accountCount");
-       	}
+		}
       
-     	// update the "Run Bing Pong" button to show the number of accounts, but only do it if the but is not running
+		// update the "Run Bing Pong" button to show the number of accounts, but only do it if the but is not running
 		if (!accountsDone) { 
 			changeButtonText("Run Bing Pong (" + accountCount + (accountCount == 1 ? " account" : " accounts") + " configured)");
 		}
