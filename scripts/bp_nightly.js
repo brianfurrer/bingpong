@@ -613,7 +613,7 @@ function performThisStep(stepNumber) {
 				document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
 	            		
 				performThisStep(9);
-	        }, function () { // account needs a CAPTCHA to continue
+			}, function () { // account needs a CAPTCHA to continue
 				// GA tracking
 				ga('send', 'event', 'Bing Pong', 'Statistics', 'Dashboard CAPTCHA'); 
 				
@@ -646,17 +646,17 @@ function performThisStep(stepNumber) {
 						}
 					}, 1000);
 				} else {
-		            document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		           	document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		           	// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		            document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-		            document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
-		            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-		            document.getElementById('credits' + currentAccountIndex).innerHTML = "CAPTCHA";
+					document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+					document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
+					document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+					document.getElementById('credits' + currentAccountIndex).innerHTML = "CAPTCHA";
 		            		
-		            performThisStep(9);
-		        }
+					performThisStep(9);
+				}
 			});
 		} else if (stepNumber == 2) { // get the dashboard and parse it for credit count, number of searches to do, ...
 			changeStatusText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the Bing Rewards dashboard...", "&nbsp;", "&nbsp;");
