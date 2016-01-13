@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1170 (1/11/2016)
+// Current version: 0.21.0-1171 (1/12/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1170 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1171 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -217,8 +217,8 @@ function parseCookieInfo(callback) {
 		document.getElementById('autoRunTime').disabled = false;
 		if (getCookie("runOnPageLoad") !== "RUN_ON_PAGE_LOAD.ENABLED") { 
 			if (bpConfirm("You have previously saved settings with the \"Automatically run Bing Pong daily\" box checked but not with the \"Automatically run Bing Pong on each visit\" box checked. Activating the automatically-run-daily feature requires running Bing Pong. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) { 
-      				runBingPong();
-      		}
+				runBingPong();
+			}
 		}
 	}
 		
@@ -323,22 +323,22 @@ function saveSettings() {
 	if (parseFloat(document.getElementById('minSearchDelayTime').value) != NaN && 
 		parseFloat(document.getElementById('maxSearchDelayTime').value) != NaN && 
 		parseFloat(document.getElementById('minSearchDelayTime').value) < parseFloat(document.getElementById('maxSearchDelayTime').value)) { 
-      	setCookie("minSearchDelayTime", document.getElementById('minSearchDelayTime').value);
-      	setCookie("maxSearchDelayTime", document.getElementById('maxSearchDelayTime').value);
+		setCookie("minSearchDelayTime", document.getElementById('minSearchDelayTime').value);
+		setCookie("maxSearchDelayTime", document.getElementById('maxSearchDelayTime').value);
    	}
    	
    	if (!isNaN(document.getElementById('numberOfDesktopSearches').value)) { 
-   		setCookie("numberOfDesktopSearches", document.getElementById('numberOfDesktopSearches').value);
+		setCookie("numberOfDesktopSearches", document.getElementById('numberOfDesktopSearches').value);
    	}
    	
 	if (!isNaN(document.getElementById('numberOfMobileSearches').value)) { 
-   		setCookie("numberOfMobileSearches", document.getElementById('numberOfMobileSearches').value);
+		setCookie("numberOfMobileSearches", document.getElementById('numberOfMobileSearches').value);
    	}
    	
-   	// clear the "settings have been changed..." timer
-   	clearStatusTimeout();
+	// clear the "settings have been changed..." timer
+	clearStatusTimeout();
    	
-   	changeStatusText("Settings have been saved.", "&nbsp;", "&nbsp;");
+	changeStatusText("Settings have been saved.", "&nbsp;", "&nbsp;");
    	statusTimeout = setTimeout(function () {
    		changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
    		clearStatusTimeout();
@@ -356,21 +356,21 @@ function onSettingsChange() {
 	(parseFloat(document.getElementById('minSearchDelayTime').value) > parseFloat(document.getElementById('maxSearchDelayTime').value)) || 
 	document.getElementById('minSearchDelayTime').value == "" || 
 	document.getElementById('maxSearchDelayTime').value == "") {
-      	document.getElementById('runBingPongButton').disabled = true;
+		document.getElementById('runBingPongButton').disabled = true;
    	} else {
-      	document.getElementById('runBingPongButton').disabled = false;
-      	minSearchDelayTime = document.getElementById('minSearchDelayTime').value;
-      	maxSearchDelayTime = document.getElementById('maxSearchDelayTime').value;
-      	numberOfDesktopSearches = document.getElementById('numberOfDesktopSearches').value;
-      	numberOfMobileSearches = document.getElementById('numberOfMobileSearches').value;
+		document.getElementById('runBingPongButton').disabled = false;
+		minSearchDelayTime = document.getElementById('minSearchDelayTime').value;
+		maxSearchDelayTime = document.getElementById('maxSearchDelayTime').value;
+		numberOfDesktopSearches = document.getElementById('numberOfDesktopSearches').value;
+		numberOfMobileSearches = document.getElementById('numberOfMobileSearches').value;
    	}
    	
 	if (document.getElementById('useSearchDelayOption').checked) { 
-      	document.getElementById('minSearchDelayTime').disabled = false;
-      	document.getElementById('maxSearchDelayTime').disabled = false;
+		document.getElementById('minSearchDelayTime').disabled = false;
+		document.getElementById('maxSearchDelayTime').disabled = false;
    	} else {
-     	document.getElementById('minSearchDelayTime').disabled = true;
-      	document.getElementById('maxSearchDelayTime').disabled = true;
+		document.getElementById('minSearchDelayTime').disabled = true;
+		document.getElementById('maxSearchDelayTime').disabled = true;
   	}
   	
   	if (document.getElementById('multipleAccountsOption').checked) {
@@ -472,8 +472,8 @@ function autoRunOptionChecked() {
 	if (document.getElementById('autoRunOption').checked == true) { 
       	if (bpConfirm("Bing Pong must run at least once after checking this box in order for it to run automatically daily at the requested time. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) {
 			runBingPong();
-      	}
-   	}
+		}
+	}
 }
 
 function updateCreditCounter(data, useSearchWindowData) {
@@ -582,44 +582,44 @@ function performThisStep(stepNumber) {
 				performThisStep(2);
 			}, function () { // maximum number of log-in attempts exceeded
 				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            // document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
 				document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).innerHTML = "BAD INFO?";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('credits' + currentAccountIndex).innerHTML = "BAD INFO?";
 	            		
-	            performThisStep(9);
+				performThisStep(9);
 			}, function () { // account is blocked
 				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-	            document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-	            document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
+				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+				document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+				document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
 	            		
-	            performThisStep(9);
+				performThisStep(9);
 			}, function () { // account is banned
 				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            // document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-	           	document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
+				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
 	            		
-	            performThisStep(9);
+				performThisStep(9);
 	        }, function () { // account needs a CAPTCHA to continue
-	            // GA tracking
+				// GA tracking
 				ga('send', 'event', 'Bing Pong', 'Statistics', 'Dashboard CAPTCHA'); 
 				
-	            if (document.getElementById('pauseOnCaptchaOption').checked) {
-		            var tempSeconds = CAPTCHA_MESSAGE_TIMEOUT;
-		            changeStatusText("A CAPTCHA has been detected on the dashboard.", "To solve it, you will be taken there in " + tempSeconds + " seconds.", "&nbsp;");
+				if (document.getElementById('pauseOnCaptchaOption').checked) {
+					var tempSeconds = CAPTCHA_MESSAGE_TIMEOUT;
+					changeStatusText("A CAPTCHA has been detected on the dashboard.", "To solve it, you will be taken there in " + tempSeconds + " seconds.", "&nbsp;");
 		            		
 					statusTimeout = setInterval(function () { 
 						tempSeconds--;
