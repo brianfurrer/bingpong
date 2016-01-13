@@ -470,7 +470,7 @@ function onAccountCheckmarksChange() {
 	
 function autoRunOptionChecked() { 
 	if (document.getElementById('autoRunOption').checked == true) { 
-      	if (bpConfirm("Bing Pong must run at least once after checking this box in order for it to run automatically daily at the requested time. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) {
+		if (bpConfirm("Bing Pong must run at least once after checking this box in order for it to run automatically daily at the requested time. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) {
 			runBingPong();
 		}
 	}
