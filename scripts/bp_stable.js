@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1115 (11/12/2015)
+// Current version: 0.21.0-1189 (1/15/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1115 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1189 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -60,8 +60,8 @@ var stopRunningBingPongFlag = false; // for pausing/stopping
 var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.3.6.1", "1.3.7.0", "1.3.8.4", "1.3.9.18", "1.3.10.0"];
-var bphLatestVersion = "1.3.10.0";
+var bphCompatibleVersions = ["1.3.8.4", "1.3.9.18", "1.3.10.0", "1.3.11.10", "1.4.0.3"];
+var bphLatestVersion = "1.3.11.10";
 var bphInstalled = false;
 
 // license
@@ -73,6 +73,15 @@ bp.checkForLicense = function (callback) {
 			bp.isLicensed = response;
 			bp.licenseIsCached = true
 			Object.freeze(bp);
+			
+			// remove ads for licensed users
+			setCookie("removeAd", bp.isLicensed);
+			
+			if (bp.isLicensed) { 
+				try {
+					document.getElementById('ad').style.display = "none";
+				} catch (e) {};
+			}
 			
 			callback(response);
 		} catch (e) {
@@ -207,9 +216,9 @@ function parseCookieInfo(callback) {
 		document.getElementById('autoRunOption').checked = true;
 		document.getElementById('autoRunTime').disabled = false;
 		if (getCookie("runOnPageLoad") !== "RUN_ON_PAGE_LOAD.ENABLED") { 
-			if (confirm("You have previously saved settings with the \"Automatically run Bing Pong daily\" box checked but not with the \"Automatically run Bing Pong on each visit\" box checked. Activating the automatically-run-daily feature requires running Bing Pong. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) { 
-      				runBingPong();
-      		}
+			if (bpConfirm("You have previously saved settings with the \"Automatically run Bing Pong daily\" box checked but not with the \"Automatically run Bing Pong on each visit\" box checked. Activating the automatically-run-daily feature requires running Bing Pong. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) { 
+				runBingPong();
+			}
 		}
 	}
 		
@@ -314,22 +323,22 @@ function saveSettings() {
 	if (parseFloat(document.getElementById('minSearchDelayTime').value) != NaN && 
 		parseFloat(document.getElementById('maxSearchDelayTime').value) != NaN && 
 		parseFloat(document.getElementById('minSearchDelayTime').value) < parseFloat(document.getElementById('maxSearchDelayTime').value)) { 
-      	setCookie("minSearchDelayTime", document.getElementById('minSearchDelayTime').value);
-      	setCookie("maxSearchDelayTime", document.getElementById('maxSearchDelayTime').value);
+		setCookie("minSearchDelayTime", document.getElementById('minSearchDelayTime').value);
+		setCookie("maxSearchDelayTime", document.getElementById('maxSearchDelayTime').value);
    	}
    	
    	if (!isNaN(document.getElementById('numberOfDesktopSearches').value)) { 
-   		setCookie("numberOfDesktopSearches", document.getElementById('numberOfDesktopSearches').value);
+		setCookie("numberOfDesktopSearches", document.getElementById('numberOfDesktopSearches').value);
    	}
    	
 	if (!isNaN(document.getElementById('numberOfMobileSearches').value)) { 
-   		setCookie("numberOfMobileSearches", document.getElementById('numberOfMobileSearches').value);
+		setCookie("numberOfMobileSearches", document.getElementById('numberOfMobileSearches').value);
    	}
    	
-   	// clear the "settings have been changed..." timer
-   	clearStatusTimeout();
+	// clear the "settings have been changed..." timer
+	clearStatusTimeout();
    	
-   	changeStatusText("Settings have been saved.", "&nbsp;", "&nbsp;");
+	changeStatusText("Settings have been saved.", "&nbsp;", "&nbsp;");
    	statusTimeout = setTimeout(function () {
    		changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
    		clearStatusTimeout();
@@ -347,21 +356,21 @@ function onSettingsChange() {
 	(parseFloat(document.getElementById('minSearchDelayTime').value) > parseFloat(document.getElementById('maxSearchDelayTime').value)) || 
 	document.getElementById('minSearchDelayTime').value == "" || 
 	document.getElementById('maxSearchDelayTime').value == "") {
-      	document.getElementById('runBingPongButton').disabled = true;
+		document.getElementById('runBingPongButton').disabled = true;
    	} else {
-      	document.getElementById('runBingPongButton').disabled = false;
-      	minSearchDelayTime = document.getElementById('minSearchDelayTime').value;
-      	maxSearchDelayTime = document.getElementById('maxSearchDelayTime').value;
-      	numberOfDesktopSearches = document.getElementById('numberOfDesktopSearches').value;
-      	numberOfMobileSearches = document.getElementById('numberOfMobileSearches').value;
+		document.getElementById('runBingPongButton').disabled = false;
+		minSearchDelayTime = document.getElementById('minSearchDelayTime').value;
+		maxSearchDelayTime = document.getElementById('maxSearchDelayTime').value;
+		numberOfDesktopSearches = document.getElementById('numberOfDesktopSearches').value;
+		numberOfMobileSearches = document.getElementById('numberOfMobileSearches').value;
    	}
    	
 	if (document.getElementById('useSearchDelayOption').checked) { 
-      	document.getElementById('minSearchDelayTime').disabled = false;
-      	document.getElementById('maxSearchDelayTime').disabled = false;
+		document.getElementById('minSearchDelayTime').disabled = false;
+		document.getElementById('maxSearchDelayTime').disabled = false;
    	} else {
-     	document.getElementById('minSearchDelayTime').disabled = true;
-      	document.getElementById('maxSearchDelayTime').disabled = true;
+		document.getElementById('minSearchDelayTime').disabled = true;
+		document.getElementById('maxSearchDelayTime').disabled = true;
   	}
   	
   	if (document.getElementById('multipleAccountsOption').checked) {
@@ -461,40 +470,53 @@ function onAccountCheckmarksChange() {
 	
 function autoRunOptionChecked() { 
 	if (document.getElementById('autoRunOption').checked == true) { 
-      	if (confirm("Bing Pong must run at least once after checking this box in order for it to run automatically daily at the requested time. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) {
+		if (bpConfirm("Bing Pong must run at least once after checking this box in order for it to run automatically daily at the requested time. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) {
 			runBingPong();
-      	}
-   	}
+		}
+	}
 }
 
-function updateCreditCounter(data) { 
-	tempIndex = data.indexOf("</div><div class=\"credits-label\">Available");
-	accountCredits[currentAccountIndex] = data.substring(tempIndex - 4, tempIndex); // get 4 characters for the credit count (may contain ">")
+function updateCreditCounter(data, useSearchWindowData) {
+	if (useSearchWindowData) { 
+		if (data.indexOf("<meta name=\"mobileoptimized\"") == -1) { // PC search
+			accountCredits[currentAccountIndex] = data.substring(data.indexOf("\"id_rc\"") + 8, data.indexOf("</span><span class=\"id_avatar sw_meIc\""));
+		} else { // mobile search
+			var temp = data.substring(data.indexOf("Transition.Event.refreshBalance(\'") + 33, data.length);
+			accountCredits[currentAccountIndex] = temp.substring(0, temp.indexOf("\'"));
+		}
+	} else {
+		tempIndex = data.indexOf("</div><div class=\"credits-label\">Available");
+		accountCredits[currentAccountIndex] = data.substring(tempIndex - 4, tempIndex); // get 4 characters for the credit count (may contain ">")
+	   
+		if (isNaN(accountCredits[currentAccountIndex])) { // 3 digit credit count
+			accountCredits[currentAccountIndex] = data.substring(tempIndex - 3, tempIndex); 
+		}
+		
+		if (isNaN(accountCredits[currentAccountIndex])) { // 2 digit credit count
+			accountCredits[currentAccountIndex] = data.substring(tempIndex - 2, tempIndex); 
+		}
+		
+		if (isNaN(accountCredits[currentAccountIndex])) { // 1 digit credit count
+			accountCredits[currentAccountIndex] = data.substring(tempIndex - 1, tempIndex); 
+		}
+	   
+		// check if the goal reward is redeemable
+		isRedeemable = ((data.indexOf("<div class=\"progress-percentage\">100%") == -1) ? false : true);
+		accountRedeemStatuses[currentAccountIndex] = isRedeemable;
+		
+		// store the redeemability status in a cookie
+		setCookie("isRedeemable" + currentAccountIndex, isRedeemable);
+		
+		// update the credit counter display to reflect the redeemability status
+		document.getElementById('credits' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
+		document.getElementById('accountName' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
+	}
    
-   	if (isNaN(accountCredits[currentAccountIndex])) { // 3 digit credit count
-       	accountCredits[currentAccountIndex] = data.substring(tempIndex - 3, tempIndex); 
-  	}
-  	
-	if (isNaN(accountCredits[currentAccountIndex])) { // 2 digit credit count
-      	accountCredits[currentAccountIndex] = data.substring(tempIndex - 2, tempIndex); 
-   	}
-   	
-   	if (isNaN(accountCredits[currentAccountIndex])) { // 1 digit credit count
-      	accountCredits[currentAccountIndex] = data.substring(tempIndex - 1, tempIndex); 
-   	}
-   
-   	// check if the goal reward is redeemable
-   	isRedeemable = ((data.indexOf("<div class=\"progress-percentage\">100%") == -1) ? false : true);
-   	accountRedeemStatuses[currentAccountIndex] = isRedeemable;
-   
-   	// store credit count and redeemability status in a cookie
+   	// store the credit count in a cookie
    	setCookie("credits" + currentAccountIndex, accountCredits[currentAccountIndex]);
-   	setCookie("isRedeemable" + currentAccountIndex, isRedeemable);
    
    	// update the credit counter display
    	document.getElementById('credits' + currentAccountIndex).innerHTML = (!isNaN(accountCredits[currentAccountIndex]) ? accountCredits[currentAccountIndex] : "<font color=\"red\">???</font>");
-  	document.getElementById('credits' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
-   	document.getElementById('accountName' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
 }
 
 function stopRunningBingPong() { 
@@ -560,44 +582,44 @@ function performThisStep(stepNumber) {
 				performThisStep(2);
 			}, function () { // maximum number of log-in attempts exceeded
 				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            // document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
 				document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).innerHTML = "BAD INFO?";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('credits' + currentAccountIndex).innerHTML = "BAD INFO?";
 	            		
-	            performThisStep(9);
+				performThisStep(9);
 			}, function () { // account is blocked
 				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-	            document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-	            document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
+				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+				document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+				document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
 	            		
-	            performThisStep(9);
+				performThisStep(9);
 			}, function () { // account is banned
 				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            // document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	           	document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-	           	document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-	            document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
+				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+				document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
 	            		
-	            performThisStep(9);
-	        }, function () { // account needs a CAPTCHA to continue
-	            // GA tracking
+				performThisStep(9);
+			}, function () { // account needs a CAPTCHA to continue
+				// GA tracking
 				ga('send', 'event', 'Bing Pong', 'Statistics', 'Dashboard CAPTCHA'); 
 				
-	            if (document.getElementById('pauseOnCaptchaOption').checked) {
-		            var tempSeconds = CAPTCHA_MESSAGE_TIMEOUT;
-		            changeStatusText("A CAPTCHA has been detected on the dashboard.", "To solve it, you will be taken there in " + tempSeconds + " seconds.", "&nbsp;");
+				if (document.getElementById('pauseOnCaptchaOption').checked) {
+					var tempSeconds = CAPTCHA_MESSAGE_TIMEOUT;
+					changeStatusText("A CAPTCHA has been detected on the dashboard.", "To solve it, you will be taken there in " + tempSeconds + " seconds.", "&nbsp;");
 		            		
 					statusTimeout = setInterval(function () { 
 						tempSeconds--;
@@ -624,17 +646,17 @@ function performThisStep(stepNumber) {
 						}
 					}, 1000);
 				} else {
-		            document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		           	document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		           	// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		            document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-		            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-		            document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
-		            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-		            document.getElementById('credits' + currentAccountIndex).innerHTML = "CAPTCHA";
+					document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+					document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+					document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
+					document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+					document.getElementById('credits' + currentAccountIndex).innerHTML = "CAPTCHA";
 		            		
-		            performThisStep(9);
-		        }
+					performThisStep(9);
+				}
 			});
 		} else if (stepNumber == 2) { // get the dashboard and parse it for credit count, number of searches to do, ...
 			changeStatusText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the Bing Rewards dashboard...", "&nbsp;", "&nbsp;");
@@ -667,7 +689,7 @@ function performThisStep(stepNumber) {
 								performThisStep(4);
 							} else if (!mobileSearchesAreComplete) { 
 								performThisStep(5);
-							} else if (numberOfTasksIncomplete > 0) { 
+							} else if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) { 
 								performThisStep(7);
 							} else { // everything is done
 								performThisStep(9);
@@ -700,7 +722,7 @@ function performThisStep(stepNumber) {
 								getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) {
 									if (!mobileSearchesAreComplete) { 
 										performThisStep(5);
-									} else if (numberOfTasksIncomplete > 0) { 
+									} else if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) { 
 										performThisStep(7);
 									} else { // everything is done
 										performThisStep(9);
@@ -741,7 +763,7 @@ function performThisStep(stepNumber) {
 								}
 								
 								getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) { 
-									if (numberOfTasksIncomplete > 0) { 
+									if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) { 
 										performThisStep(7);
 									} else {
 										performThisStep(9);
@@ -889,7 +911,7 @@ function finishRunningBingPong() {
 		// calculate the time between now and the next run time
 		var currentTime = new Date().getTime();
 		var timeToMidnight = currentTime - 3600*1000*(new Date()).getHours() 
-										 - 60*1000(new Date()).getMinutes() 
+										 - 60*1000*(new Date()).getMinutes() 
 										 - 1000*(new Date()).getSeconds() 
 										 - (new Date()).getMilliseconds()
 										 + 3600*1000*24; // calculate time to midnight of the next day
@@ -954,11 +976,11 @@ function parseTrendingSearchTerms(callback) {
 function getDashboardContents(callback) { 
 	performGETRequest("https://www.bing.com/rewards/dashboard", false, function (contents) {
 		// update the global dashboardData variable
-      	dashboardData = contents;
+		dashboardData = contents;
       			
-      	// return to caller
-      	callback();
-    });
+		// return to caller
+		callback();
+	});
 }
 
 function parseDashboardContents(callbackOnSuccess, callbackOnBadAccount) { 
@@ -967,43 +989,43 @@ function parseDashboardContents(callbackOnSuccess, callbackOnBadAccount) {
 		if (dashboardData.indexOf("up to 2 credits a day") != -1 || 
 		dashboardData.indexOf("For a limited time you're earning free credits.") != -1 ||
 		dashboardData.indexOf("This isn't a Bing Rewards account.") != -1) {
-            document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-           	document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-           	document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-            document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-            document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
+			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
             			
-            // continue with the next account
+			// continue with the next account
 			callbackOnBadAccount();
 			return;
-        }
+		}
             		
-        // get the number of credits required to max out the PC search credits for the day
-        if (dashboardData.indexOf("15 credits a day") != -1) { 
+		// get the number of credits required to max out the PC search credits for the day
+		if (dashboardData.indexOf("15 credits a day") != -1) { 
 			searchCountText = "15 credits a day";
-            creditsToGet = 15;
-        } else if (dashboardData.indexOf("20 credits a day") != -1) { 
-           	searchCountText = "20 credits a day";
-            creditsToGet = 20;
-        } else if (dashboardData.indexOf("30 credits a day") != -1) { 
+			creditsToGet = 15;
+		} else if (dashboardData.indexOf("20 credits a day") != -1) { 
+			searchCountText = "20 credits a day";
+			creditsToGet = 20;
+		} else if (dashboardData.indexOf("30 credits a day") != -1) { 
 			searchCountText = "30 credits a day";
-            creditsToGet = 30;
-        } else if (dashboardData.indexOf("60 credits a day") != -1) { 
-            searchCountText = "60 credits a day";
-            creditsToGet = 60;
-        } else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 75 credits") != -1) {
-            searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
-            creditsToGet = 75;
-        } else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 150 credits") != -1) {
-            searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
-            creditsToGet = 150;
+			creditsToGet = 30;
+		} else if (dashboardData.indexOf("60 credits a day") != -1) { 
+			searchCountText = "60 credits a day";
+			creditsToGet = 60;
+		} else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 75 credits") != -1) {
+			searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
+			creditsToGet = 75;
+		} else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 150 credits") != -1) {
+			searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
+			creditsToGet = 150;
 		} else { // fail account 
 			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-           	document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-            document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
 			document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
 			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
 			document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
@@ -1024,7 +1046,7 @@ function parseDashboardContents(callbackOnSuccess, callbackOnBadAccount) {
          	
 		// if applicable, fetch the number of credits the account has and update the display
 		if (document.getElementById('multipleAccountsOption').checked) { 
-			updateCreditCounter(dashboardData);
+			updateCreditCounter(dashboardData, false);
 		}
          	
 		// return to caller
@@ -1098,7 +1120,7 @@ function handleSearchCaptcha(numberOfSearches, doMobileSearches, callback) {
 			bringSearchCaptchaIntoFocus(function () {
 				changeStatusText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Waiting for the CAPTCHA to be solved...", "This message will disappear once you have solved the CAPTCHA.", "&nbsp;");
 				var captchaInterval = setInterval(function () {
-					checkForSearchCaptcha(function (captchaDetected) {
+					checkForSearchCaptcha(function (tabIsDead, captchaDetected) {
 						if (!captchaDetected) { 
 							clearInterval(captchaInterval);
 							
@@ -1138,7 +1160,7 @@ function performSearchesBPH(numberOfSearches, doMobileSearches, callback) {
 				var continueSearching;
 				
 				var checkForCaptcha = function () {
-					checkForSearchCaptcha(function (captchaDetected) {
+					checkForSearchCaptcha(function (tabIsDead, captchaDetected) {
 						if (stopRunningBingPongFlag) { 
 							// we need to call performThisStep() again to get Bing Pong to stop
 							disableMobileMode(function () {
@@ -1146,10 +1168,19 @@ function performSearchesBPH(numberOfSearches, doMobileSearches, callback) {
 									performThisStep(0);
 								});
 							});
+						} else if (tabIsDead) {
+							continueSearching();
 						} else if (captchaDetected) { // search captcha detected
 							handleSearchCaptcha(numberOfSearches, doMobileSearches, callback);
 						} else { // no captcha
-							continueSearching();
+							getSearchWindowContents(function (contents) { 
+								// update the credit counter with fresh data from the search window
+								if (document.getElementById('multipleAccountsOption').checked) { 
+									updateCreditCounter(contents, true);
+								}
+								
+								continueSearching();
+							});
 						}
 					});
 				};
@@ -1296,8 +1327,9 @@ function performSearchesLegacy(numberOfSearches, callback) {
 function getSearchCreditCount(doMobileSearches, useCachedDashboardData, callback) { 
 	var proceed = function () {
 		if (doMobileSearches) { 
-			if (dashboardData.indexOf("<div class=\"progress\">10 credits") == -1) { // mobile searches are incomplete
-				callback(false, dashboardData.substring(dashboardData.indexOf("of 10 credits") - 2, dashboardData.indexOf("of 10 credits") - 1));
+			if (dashboardData.indexOf("Earn 1 credit per 2 Bing searches up to 10 credits a day.</span></span><div class=\"check-wrapper tile-height\"><div class=\"check close-check dashboard-sprite\"></div></div><div class=\"progress\">10 credits") == -1) { // mobile searches are incomplete
+				var tempString = "Earn 1 credit per 2 Bing searches up to 10 credits a day.</span></span><div class=\"check-wrapper tile-height\"><div class=\"check open-check dashboard-sprite\"></div></div><div class=\"progress\">";
+				callback(false, dashboardData.substring(dashboardData.indexOf(tempString) + 191, dashboardData.indexOf(tempString) + 192));
 			} else { // mobile searches are complete
 				callback(true, 10);
 			}
@@ -1323,7 +1355,7 @@ function verifySearches(doMobileSearches, callback) {
 	getSearchCreditCount(doMobileSearches, false, function (searchesAreComplete, numberOfNewCredits) { 
 		// if applicable, update the credit counter
 		if (document.getElementById('multipleAccountsOption').checked) { 
-			updateCreditCounter(dashboardData);
+			updateCreditCounter(dashboardData, false);
 		}
 		
 		if (doMobileSearches) {
@@ -1507,7 +1539,7 @@ function getNumberOfMissingDashboardTasks(includeTrivia, useCachedDashboardData,
 		var numberOfTasksIncomplete = dashboardData.substring(0, dashboardData.indexOf("Every day ways to earn")).split("check open-check dashboard-sprite").length - 1;
 		
 		if (!includeTrivia) { 
-			numberOfTasksIncomplete -= dashboardData.substring(0, dashboardData.indexOf("Every day ways to earn")).split("raid=quiz&amp;").length;
+			numberOfTasksIncomplete -= dashboardData.substring(0, dashboardData.indexOf("Every day ways to earn")).split("raid=quiz&amp;").length - 1;
 		}
 		
 		callback(numberOfTasksIncomplete);
@@ -1526,7 +1558,7 @@ function verifyDashboardTasks(callback) {
 	getNumberOfMissingDashboardTasks(false, false, function (numberOfTasksIncomplete) {
 		// if applicable, update the credit counter
 		if (document.getElementById('multipleAccountsOption').checked) { 
-			updateCreditCounter(dashboardData);
+			updateCreditCounter(dashboardData, false);
 		}
 		
 		if (numberOfTasksIncomplete > 0) { // tasks failed
@@ -1733,9 +1765,9 @@ function updateAccountManagerDisplay() {
 		 
 			// fetch the value of accountCount
 			accountCount = getCookie("accountCount");
-       	}
+		}
       
-     	// update the "Run Bing Pong" button to show the number of accounts, but only do it if the but is not running
+		// update the "Run Bing Pong" button to show the number of accounts, but only do it if the but is not running
 		if (!accountsDone) { 
 			changeButtonText("Run Bing Pong (" + accountCount + (accountCount == 1 ? " account" : " accounts") + " configured)");
 		}
@@ -1864,7 +1896,7 @@ function addAccountInManager() {
 		document.getElementById('password').disabled = false;
 		document.getElementById('addAccountButton').disabled = false;
 		changeStatusText(DEFAULT_STATUS_TEXT, "DO_NOT_CHANGE", "DO_NOT_CHANGE");
-		alert("There was an issue logging out of the previous account. Please contact me for further assistance.");
+		bpAlert("There was an issue logging out of the previous account. Please contact me for further assistance.");
 	});
 }
 
@@ -1886,7 +1918,7 @@ function addAccountsInBulk() {
 		if (fieldLines[i].indexOf(':') != -1 && !dupAccount) { // account is fine, so add it
 			addAccount(tempUsername, tempPassword, false, function () {});
 		} else if (fieldLines[i].indexOf(':') == -1) { // malformed line, so skip this line and all lines after it
-			alert("There was a problem parsing line " + (i + 1) + " (" + fieldLines[i] + "). This line and all lines after it have not been parsed.");
+			bpAlert("There was a problem parsing line " + (i + 1) + " (" + fieldLines[i] + "). This line and all lines after it have not been parsed.");
 			return false;
 		} else {
 			// do nothing at this time
@@ -1911,7 +1943,7 @@ function addAccount(username, password, infoNeedsVerification, callbackOnSuccess
 	 		}
 	 	
 	 		if (duplicateAccount) { 
-	 			alert(username + " is already configured with Bing Pong.");
+	 			bpAlert(username + " is already configured with Bing Pong.");
 	 		} else { 
 	 			// incriment the number of accounts stored in Bing Pong
 	 			accountCount++;
@@ -2123,7 +2155,7 @@ function closeDashboardForCaptcha(callback) {
 function checkForSearchCaptcha(callback) {
 	chrome.runtime.sendMessage(bphExtensionID, {action: "checkForSearchCaptcha"}, function (response) {
 		try {
-			callback(response.captchaDetected);
+			callback(response.tabIsDead, response.captchaDetected);
 		} catch (e) {
 			setTimeout(function () { checkForSearchCaptcha(callback); }, COMMUNICATION_FAILURE_DELAY);
 		}
@@ -2187,7 +2219,7 @@ function verifyLogin(username, password, callbackOnSuccess, callbackOnFailure, c
 		} else if (dashboardData.indexOf("/proofs/Verify") != -1 || dashboardData.indexOf("/ar/cancel") != -1 || dashboardData.indexOf("tou/accrue") != -1) { // account is blocked
 			loginAttemptCount = 0;
 			callbackOnBlocked();
-		} else if (dashboardData.indexOf("Your Bing Rewards account has been closed") != -1) { // account is banned
+		} else if (dashboardData.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
 			loginAttemptCount = 0;
 			callbackOnBanned();
 		} else if (dashboardData.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
@@ -2210,7 +2242,7 @@ function verifyLogout(callbackOnSuccess, callbackOnFailure) {
 		} else { // not logged out, so attempt another logout
 			logoutOfAccount(callbackOnSuccess, callbackOnFailure);
 		}
-    });
+	});
 }
 
 function enableMobileMode(callback) { 
@@ -2275,6 +2307,16 @@ function performGETRequest(ajaxURL, responseIsJSON, callback) {
 			callback(response.contents);
 		} catch (e) { 
 			performGETRequest(ajaxURL, responseIsJSON, callback);
+		}
+	});
+}
+
+function getSearchWindowContents(callback) { 
+	chrome.runtime.sendMessage(bphExtensionID, {action: "getSearchWindowContents"}, function (response) { 
+		try {
+			callback(response.contents);
+		} catch (e) { 
+			getSearchWindowContents(callback);
 		}
 	});
 }
