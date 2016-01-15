@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1171 (1/12/2016)
+// Current version: 0.21.0-1188 (1/15/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1171 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1188 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -60,8 +60,8 @@ var stopRunningBingPongFlag = false; // for pausing/stopping
 var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.3.8.4", "1.3.9.18", "1.3.10.0", "1.4.0.3"];
-var bphLatestVersion = "1.3.10.0";
+var bphCompatibleVersions = ["1.3.8.4", "1.3.9.18", "1.3.10.0", "1.3.11.10", "1.4.0.3"];
+var bphLatestVersion = "1.3.11.10";
 var bphInstalled = false;
 
 // license
@@ -1069,7 +1069,8 @@ function generateSearchURL(doMobileSearches, callback) {
 				url += "http://www.bing.com/search?q=" + searchExpression + "&qs=n&form=QBLH&pq=" + searchExpression + "&sc=12-" + searchExpression.length + "&sp=-1&sk=";
 			} else {
 				// match the URL scheme used by the Bing Rewards Chrome extension
-				url += "https://www.bing.com/search?FORM=U312DF&PC=U312&q=" + searchExpression;
+				// url += "https://www.bing.com/search?FORM=U312DF&PC=U312&q=" + searchExpression;
+				url += "https://www.bing.com/search?FORM=U312DF&PC=U312&q=fart";
 			}
 			
 			// return to caller
@@ -1120,7 +1121,7 @@ function handleSearchCaptcha(numberOfSearches, doMobileSearches, callback) {
 			bringSearchCaptchaIntoFocus(function () {
 				changeStatusText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Waiting for the CAPTCHA to be solved...", "This message will disappear once you have solved the CAPTCHA.", "&nbsp;");
 				var captchaInterval = setInterval(function () {
-					checkForSearchCaptcha(function (captchaDetected) {
+					checkForSearchCaptcha(function (tabIsDead, captchaDetected) {
 						if (!captchaDetected) { 
 							clearInterval(captchaInterval);
 							
@@ -1160,7 +1161,7 @@ function performSearchesBPH(numberOfSearches, doMobileSearches, callback) {
 				var continueSearching;
 				
 				var checkForCaptcha = function () {
-					checkForSearchCaptcha(function (captchaDetected) {
+					checkForSearchCaptcha(function (tabIsDead, captchaDetected) {
 						if (stopRunningBingPongFlag) { 
 							// we need to call performThisStep() again to get Bing Pong to stop
 							disableMobileMode(function () {
@@ -1168,6 +1169,8 @@ function performSearchesBPH(numberOfSearches, doMobileSearches, callback) {
 									performThisStep(0);
 								});
 							});
+						} else if (tabIsDead) {
+							continueSearching();
 						} else if (captchaDetected) { // search captcha detected
 							handleSearchCaptcha(numberOfSearches, doMobileSearches, callback);
 						} else { // no captcha
@@ -2153,7 +2156,7 @@ function closeDashboardForCaptcha(callback) {
 function checkForSearchCaptcha(callback) {
 	chrome.runtime.sendMessage(bphExtensionID, {action: "checkForSearchCaptcha"}, function (response) {
 		try {
-			callback(response.captchaDetected);
+			callback(response.tabIsDead, response.captchaDetected);
 		} catch (e) {
 			setTimeout(function () { checkForSearchCaptcha(callback); }, COMMUNICATION_FAILURE_DELAY);
 		}
