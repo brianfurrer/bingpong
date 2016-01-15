@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1188 (1/15/2016)
+// Current version: 0.21.0-1189 (1/15/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1188 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1189 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -1069,8 +1069,7 @@ function generateSearchURL(doMobileSearches, callback) {
 				url += "http://www.bing.com/search?q=" + searchExpression + "&qs=n&form=QBLH&pq=" + searchExpression + "&sc=12-" + searchExpression.length + "&sp=-1&sk=";
 			} else {
 				// match the URL scheme used by the Bing Rewards Chrome extension
-				// url += "https://www.bing.com/search?FORM=U312DF&PC=U312&q=" + searchExpression;
-				url += "https://www.bing.com/search?FORM=U312DF&PC=U312&q=fart";
+				url += "https://www.bing.com/search?FORM=U312DF&PC=U312&q=" + searchExpression;
 			}
 			
 			// return to caller
