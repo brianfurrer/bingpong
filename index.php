@@ -52,12 +52,6 @@
 			<?php include_once("scripts/adcode.php"); ?>
 			<br>
 		</span>
-		<!-- hide the ad if the user is licensed -->
-		<script>
-			if (window.localStorage.getItem("removeAd") == "true") { 
-				document.getElementById('ad').style.display = "none";
-			}
-		</script>
 		<br>
 <!--	<b>Other versions of Bing Pong:</b>
 		<br>
