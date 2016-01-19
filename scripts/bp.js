@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1190 (1/18/2016)
+// Current version: 0.21.0-1191 (1/18/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1190 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1191 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -1173,14 +1173,14 @@ function performSearchesBPH(numberOfSearches, doMobileSearches, callback) {
 						} else if (captchaDetected) { // search captcha detected
 							handleSearchCaptcha(numberOfSearches, doMobileSearches, callback);
 						} else { // no captcha
+							// update the credit counter with fresh data from the search window
 							getSearchWindowContents(function (contents) { 
-								// update the credit counter with fresh data from the search window
 								if (document.getElementById('multipleAccountsOption').checked) { 
 									updateCreditCounter(contents, true);
 								}
-								
-								continueSearching();
 							});
+							
+							continueSearching();
 						}
 					});
 				};
