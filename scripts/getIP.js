@@ -59,4 +59,4 @@ $.getJSON("http://ip-api.com/json/?callback=?", function(response) {
     document.getElementById('ip').innerHTML = response.query;
 });
 
-RefreshIP();
+refreshIP();
