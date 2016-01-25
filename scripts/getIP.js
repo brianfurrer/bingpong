@@ -1,7 +1,8 @@
 var MAX_FAILED_ATTEMPTS = 5;
+var IP_REFRESH_INTERVAL = 30000;
 var IP, isUS, failedAttempts = 0;
 
-function GetIP() { 
+function getIP() { 
 	$.ajax({
 		url: 'ip.php', // old url: http://ip-api.com/json/?fields=8193
 		type: 'GET',
@@ -11,7 +12,7 @@ function GetIP() {
       			document.getElementById('loader').innerHTML = "<img src=\"http://bing-pong.com/blue10.png\" width=\"11\" height=\"11\"></img>";
     	
         		ip = response.query;
-        		isUS = ((response.country == "United States") ? 1 : 0);
+        		isUS = (response.country == "United States");
         
         		if (isUS) { 
 				$("#flag").attr("src", "us.png");
@@ -24,12 +25,12 @@ function GetIP() {
             			document.getElementById('ip').innerHTML = "<font color=\"red\">" + response.query + "</font>";
         		}
         
-        		setTimeout(RefreshIP, 5000);
+        		setTimeout(refreshIP, IP_REFRESH_INTERVAL);
         	},
         	error: function (response) {
         		failedAttempts++;
         		if (failedAttempts < MAX_FAILED_ATTEMPTS) { 
-        			GetIP();
+        			getIP();
         		} else {
         			$("#flag").attr("src", "blue10.png");
         			document.getElementById('ip').innerHTML = "<font color=\"red\">???</font>";
@@ -39,19 +40,19 @@ function GetIP() {
         });
 }
 
-function RefreshIP() { 
+function refreshIP() { 
 	document.getElementById('loader').innerHTML = "<i class=\"fa fa-refresh fa-spin\"></i>";
-	GetIP();
+	getIP();
 }
 
-function BlinkEnded() { 
+function blinkEnded() { 
     if (!isUS) { 
     	blink();
     }
 }
 
 function blink() {
-    $('.flagclass').delay(100).fadeTo(100, 0.2).delay(100).fadeTo(100, 1, BlinkEnded);
+    $('.flagclass').delay(100).fadeTo(100, 0.2).delay(100).fadeTo(100, 1, blinkEnded);
 }
 
 $.getJSON("http://ip-api.com/json/?callback=?", function(response) {
