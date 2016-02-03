@@ -1,10 +1,11 @@
 var MAX_FAILED_ATTEMPTS = 5;
-var IP_REFRESH_INTERVAL = 30000;
+var IP_REFRESH_INTERVAL = 15000;
+var IP_URL = "http://ip-api.com/json/?fields=8193";
 var IP, isUS, failedAttempts = 0;
 
 function getIP() { 
 	$.ajax({
-		url: 'ip.php', // old url: http://ip-api.com/json/?fields=8193
+		url: IP_URL, // old url: http://ip-api.com/json/?fields=8193
 		type: 'GET',
 		dataType: 'json',
 		cache: false,
@@ -55,7 +56,7 @@ function blink() {
     $('.flagclass').delay(100).fadeTo(100, 0.2).delay(100).fadeTo(100, 1, blinkEnded);
 }
 
-$.getJSON("http://ip-api.com/json/?callback=?", function(response) {
+$.getJSON(IP_URL + "&callback=?", function(response) {
     document.getElementById('ip').innerHTML = response.query;
 });
 
