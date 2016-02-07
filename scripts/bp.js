@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1197 (1/26/2016)
+// Current version: 0.21.0-1203 (2/6/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1197 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1203 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -60,8 +60,8 @@ var stopRunningBingPongFlag = false; // for pausing/stopping
 var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.3.17.0", "1.3.17.1"];
-var bphLatestVersion = "1.3.17.1";
+var bphCompatibleVersions = ["1.4.0.145"];
+var bphLatestVersion = "1.4.0.145";
 var bphInstalled = false;
 
 // license
@@ -211,20 +211,6 @@ function parseCookieInfo(callback) {
 		enableSearchOptions();
 		disableMobileSearchOption();
 	}
-
-	if (getCookie("useAutoRun") === "AUTO_RUN.ENABLED") { 
-		document.getElementById('autoRunOption').checked = true;
-		document.getElementById('autoRunTime').disabled = false;
-		if (getCookie("runOnPageLoad") !== "RUN_ON_PAGE_LOAD.ENABLED") { 
-			if (bpConfirm("You have previously saved settings with the \"Automatically run Bing Pong daily\" box checked but not with the \"Automatically run Bing Pong on each visit\" box checked. Activating the automatically-run-daily feature requires running Bing Pong. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) { 
-				runBingPong();
-			}
-		}
-	}
-		
-	if (getCookie("autoRunTime") >= 0) { 
-		document.getElementById('autoRunTime').selectedIndex = getCookie("autoRunTime");
-	}
 		
 	if (getCookie("useSearchDelay") === "SEARCH_DELAY.ENABLED") { 
 		document.getElementById('useSearchDelayOption').checked = true;
@@ -279,6 +265,9 @@ function parseCookieInfo(callback) {
 		
 		if (getCookie("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") { 
 			document.getElementById('runOnPageLoadOption').checked = true;
+		}
+		
+		if (getCookie("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED" || location.href.indexOf("?runonpageload=1") != -1) { 
 			setTimeout(runBingPong, 1000);
 		}
 		
@@ -311,8 +300,6 @@ function saveSettings() {
    	setCookie("useMultipleAccounts", (document.getElementById('multipleAccountsOption').checked ? "MULTIPLE_ACCOUNTS.ENABLED" : "MULTIPLE_ACCOUNTS.DISABLED"));
    	setCookie("doDashboardTasks", (document.getElementById('dashboardTasksOption').checked ? "DASHBOARD_TASKS.ENABLED" : "DASHBOARD_TASKS.DISABLED"));
    	setCookie("pauseOnCaptcha", (document.getElementById('pauseOnCaptchaOption').checked ? "PAUSE_ON_CAPTCHA.ENABLED" : "PAUSE_ON_CAPTCHA.DISABLED"));
-   	setCookie("useAutoRun", (document.getElementById('autoRunOption').checked ? "AUTO_RUN.ENABLED" : "AUTO_RUN.DISABLED"));
-   	setCookie("autoRunTime", document.getElementById('autoRunTime').selectedIndex);
    	setCookie("useSearchDelay", (document.getElementById('useSearchDelayOption').checked ? "SEARCH_DELAY.ENABLED" : "SEARCH_DELAY.DISABLED"));
    	setCookie("runOnPageLoad", (document.getElementById('runOnPageLoadOption').checked ? "RUN_ON_PAGE_LOAD.ENABLED" : "RUN_ON_PAGE_LOAD.DISABLED"));
    	setCookie("waitForIPChange", (document.getElementById('waitForIPChangeOption').checked ? "WAIT_FOR_IP_CHANGE.ENABLED" : "WAIT_FOR_IP_CHANGE.DISABLED"));
@@ -396,12 +383,6 @@ function onSettingsChange() {
   	} else {
   		document.getElementById('accountsPerIP').disabled = true;
   	}
-	
-	if (document.getElementById('autoRunOption').checked) { 
-		document.getElementById('autoRunTime').disabled = false;
-	} else {
-		document.getElementById('autoRunTime').disabled = true;
-	}
 
 	// update the display with a timer to save settings
 	var tempSeconds = SAVE_SETTINGS_TIMEOUT;
@@ -466,14 +447,6 @@ function onAccountCheckmarksChange() {
 	
 	// update the account manager display
 	updateAccountManagerDisplay();
-}
-	
-function autoRunOptionChecked() { 
-	if (document.getElementById('autoRunOption').checked == true) { 
-		if (bpConfirm("Bing Pong must run at least once after checking this box in order for it to run automatically daily at the requested time. Press \"OK\" to automatically run Bing Pong now, or you can press \"Cancel\" and manually run Bing Pong later. Also, keep in mind that you must keep Bing Pong open in a browser window if you want Bing Pong to keep running.")) {
-			runBingPong();
-		}
-	}
 }
 
 function updateCreditCounter(data, useSearchWindowData) {
@@ -878,8 +851,13 @@ function finishRunningBingPong() {
 	
 	enableSettings();
 	
-	if (!bphInstalled) { 
-		enableSearchOptions();
+	if (bphInstalled) { 
+		if (location.href.indexOf("?runonpageload=1") != -1) {
+			// Bing Pong was told to run by Bing Pong Helper automatically, so close the window
+			chrome.runtime.sendMessage(bphExtensionID, {action: "closeBPWindow"}, function (response) {});
+		} else {
+			enableSearchOptions();
+		}
 	}
 	
 	if (document.getElementById('multipleAccountsOption').checked) { 
@@ -905,20 +883,6 @@ function finishRunningBingPong() {
 		
 		// reset the flag so that the next run will not be impeded
 		stopRunningBingPongFlag = false;
-	} else if (document.getElementById('autoRunOption').checked) {
-		changeStatusText("Run complete.", "Bing Pong will run again at the requested time.", "&nbsp;");
-		
-		// calculate the time between now and the next run time
-		var currentTime = new Date().getTime();
-		var timeToMidnight = currentTime - 3600*1000*(new Date()).getHours() 
-										 - 60*1000*(new Date()).getMinutes() 
-										 - 1000*(new Date()).getSeconds() 
-										 - (new Date()).getMilliseconds()
-										 + 3600*1000*24; // calculate time to midnight of the next day
-		var nextRunTime = timeToMidnight + 3600*1000*document.getElementById('autoRunTime').selectedIndex;
-		
-		// set the timer to cause Bing Pong to run again
-		setTimeout(runBingPong, nextRunTime - currentTime);
 	} else {
 		changeStatusText("Done. <a href=\"http://www.bing.com/rewards/dashboard\" target=\"_blank\">Launch the Bing Rewards dashboard?</a>", "DO_NOT_CHANGE", "DO_NOT_CHANGE");
 		
@@ -1475,7 +1439,7 @@ function parseDashboardForTasks(callback) {
 		// remove any completed tasks from the list of tasks to do
 		for (var i = 0; i < dashboardTaskURLs.length; i++) { 
 			if (dashboardTaskURLs[i].indexOf("state=Completed") != -1) { 
-				dashboardTaskURLs.splice(i, 1);
+				// dashboardTaskURLs.splice(i, 1);
 			}
 		}
    		
@@ -1637,17 +1601,12 @@ function restoreSearchBoxes() {
 
 function enableSettings() {
 	document.getElementById('runBingPongButton').disabled = false;
-	document.getElementById('autoRunOption').disabled = false;
 	document.getElementById('useSearchDelayOption').disabled = false;
 	document.getElementById('runOnPageLoadOption').disabled = false;
 	
 	if (document.getElementById('useSearchDelayOption').checked) { 
 		document.getElementById('minSearchDelayTime').disabled = false;
 		document.getElementById('minSearchDelayTime').disabled = false;
-	}
-	
-	if (document.getElementById('autoRunOption').checked) { 
-		document.getElementById('autoRunTime').disabled = false;
 	}
 	
 	// enable the account checkboxes
@@ -1690,12 +1649,10 @@ function disableSettings(alsoDisableRunButton) {
 	
 	document.getElementById('numberOfDesktopSearches').disabled = true;
 	document.getElementById('numberOfMobileSearches').disabled = true;
-	document.getElementById('autoRunOption').disabled = true;
 	document.getElementById('useSearchDelayOption').disabled = true;
 	document.getElementById('runOnPageLoadOption').disabled = true;
 	document.getElementById('minSearchDelayTime').disabled = true;
 	document.getElementById('maxSearchDelayTime').disabled = true;
-	document.getElementById('autoRunTime').disabled = true;
 	document.getElementById('multipleAccountsOption').disabled = true;
 	document.getElementById('dashboardTasksOption').disabled = true;
 	document.getElementById('pauseOnCaptchaOption').disabled = true;
@@ -2316,7 +2273,7 @@ function getWikiArticles(callback) {
 function performGETRequest(ajaxURL, responseIsJSON, callback) { 
 	chrome.runtime.sendMessage(bphExtensionID, {action: "performGETRequest", ajaxURL: ajaxURL, responseIsJSON: responseIsJSON}, function (response) { 
 		try {
-			callback(response.contents);
+			callback(response);
 		} catch (e) { 
 			performGETRequest(ajaxURL, responseIsJSON, callback);
 		}
@@ -2326,7 +2283,7 @@ function performGETRequest(ajaxURL, responseIsJSON, callback) {
 function getSearchWindowContents(callback) { 
 	chrome.runtime.sendMessage(bphExtensionID, {action: "getSearchWindowContents"}, function (response) { 
 		try {
-			callback(response.contents);
+			callback(response);
 		} catch (e) { 
 			getSearchWindowContents(callback);
 		}

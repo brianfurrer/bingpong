@@ -172,41 +172,6 @@
 							Automatically run Bing Pong on each visit
 						</td>
 					</tr>
-					<!-- "Automatically run Bing Pong daily at..." option -->
-					<tr>
-						<td class="optionsTable">
-							<input type=checkbox id="autoRunOption" onclick="onSettingsChange(); autoRunOptionChecked();" disabled>
-						</td>
-						<td class="optionsTable">
-							Automatically run Bing Pong daily at 
-							<select id="autoRunTime" onChange="onSettingsChange();" disabled>
-								<option value="1">12 AM</option>
-								<option value="2">1 AM</option>
-								<option value="3" selected>2 AM</option>
-								<option value="4">3 AM</option>
-								<option value="5">4 AM</option>
-								<option value="6">5 AM</option>
-								<option value="7">6 AM</option>
-								<option value="8">7 AM</option>
-								<option value="9">8 AM</option>
-								<option value="10">9 AM</option>
-								<option value="11">10 AM</option>
-								<option value="12">11 AM</option>
-								<option value="13">12 PM</option>
-								<option value="14">1 PM</option>
-								<option value="15">2 PM</option>
-								<option value="16">3 PM</option>
-								<option value="17">4 PM</option>
-								<option value="18">5 PM</option>
-								<option value="19">6 PM</option>
-								<option value="20">7 PM</option>
-								<option value="21">8 PM</option>
-								<option value="22">9 PM</option>
-								<option value="23">10 PM</option>
-								<option value="24">11 PM</option>
-							</select>
-						</td>
-					</tr>
 				</table>
 				<input type=button value="Bing Pong Helper options" onclick="openBPHOptions();" id="bphOptionsButton" disabled>
 				<br>
