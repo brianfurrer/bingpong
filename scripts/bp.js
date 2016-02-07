@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1203 (2/6/2016)
+// Current version: 0.21.0-1204 (2/6/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1203 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1204 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -2283,7 +2283,7 @@ function performGETRequest(ajaxURL, responseIsJSON, callback) {
 function getSearchWindowContents(callback) { 
 	chrome.runtime.sendMessage(bphExtensionID, {action: "getSearchWindowContents"}, function (response) { 
 		try {
-			callback(response);
+			callback(response.contents);
 		} catch (e) { 
 			getSearchWindowContents(callback);
 		}
