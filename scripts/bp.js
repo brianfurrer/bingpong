@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1205 (2/9/2016)
+// Current version: 0.21.0-1204 (2/6/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1205 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1204 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -60,8 +60,8 @@ var stopRunningBingPongFlag = false; // for pausing/stopping
 var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.4.1.21"];
-var bphLatestVersion = "1.4.1.21";
+var bphCompatibleVersions = ["1.4.0.146", "1.4.0.153", "1.4.0.154"];
+var bphLatestVersion = "1.4.0.154";
 var bphInstalled = false;
 
 // license
@@ -1439,7 +1439,7 @@ function parseDashboardForTasks(callback) {
 		// remove any completed tasks from the list of tasks to do
 		for (var i = 0; i < dashboardTaskURLs.length; i++) { 
 			if (dashboardTaskURLs[i].indexOf("state=Completed") != -1) { 
-				dashboardTaskURLs.splice(i, 1);
+				// dashboardTaskURLs.splice(i, 1);
 			}
 		}
    		
@@ -1514,11 +1514,6 @@ function getNumberOfMissingDashboardTasks(includeTrivia, useCachedDashboardData,
 		
 		if (!includeTrivia) { 
 			numberOfTasksIncomplete -= dashboardData.substring(0, dashboardData.indexOf("Every day ways to earn")).split("raid=quiz&amp;").length - 1;
-		}
-		
-		// if the tour isn't completed, don't include it in the missing dashboard task count
-		if (dashboardData.indexOf("Tour completed") === -1) { 
-			numberOfTasksIncomplete--;
 		}
 		
 		callback(numberOfTasksIncomplete);
