@@ -60,8 +60,8 @@ var stopRunningBingPongFlag = false; // for pausing/stopping
 var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.4.0.146", "1.4.0.153", "1.4.0.154"];
-var bphLatestVersion = "1.4.0.154";
+var bphCompatibleVersions = ["1.4.1.22"];
+var bphLatestVersion = "1.4.1.22";
 var bphInstalled = false;
 
 // license
@@ -1439,7 +1439,7 @@ function parseDashboardForTasks(callback) {
 		// remove any completed tasks from the list of tasks to do
 		for (var i = 0; i < dashboardTaskURLs.length; i++) { 
 			if (dashboardTaskURLs[i].indexOf("state=Completed") != -1) { 
-				// dashboardTaskURLs.splice(i, 1);
+				dashboardTaskURLs.splice(i, 1);
 			}
 		}
    		
