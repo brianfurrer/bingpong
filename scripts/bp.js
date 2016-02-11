@@ -60,8 +60,8 @@ var stopRunningBingPongFlag = false; // for pausing/stopping
 var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.4.1.22"];
-var bphLatestVersion = "1.4.1.22";
+var bphCompatibleVersions = ["1.4.1.22", "1.4.2.6"];
+var bphLatestVersion = "1.4.2.6";
 var bphInstalled = false;
 
 // license
