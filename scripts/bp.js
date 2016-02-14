@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1204 (2/6/2016)
+// Current version: 0.21.0-1206 (2/14/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1204 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1206 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -2177,12 +2177,10 @@ function verifyLogin(username, password, callbackOnSuccess, callbackOnFailure, c
 				if (contents.indexOf("/proofs/Verify") != -1 || contents.indexOf("/ar/cancel") != -1 || contents.indexOf("tou/accrue") != -1) { // we are actually logged in, but the account is blocked
 					loginAttemptCount = 0;
 					callbackOnBlocked();
-				} else { // we are truly logged out, so close the pop-up and make another log-in attempt
-					chrome.runtime.sendMessage(bphExtensionID, {action: "closeDashboardForVerifying"}, function (response) { 
-						logoutOfAccount(function () { 
-							logIntoAccount(username, password, callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
-						}, callbackOnFailure);
-					});
+				} else { // we are truly logged out, so make another log-in attempt 
+					logoutOfAccount(function () { 
+						logIntoAccount(username, password, callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
+					}, callbackOnFailure);
 				}
 			});
 		} else if (dashboardData.indexOf("/proofs/Verify") != -1 || dashboardData.indexOf("/ar/cancel") != -1 || dashboardData.indexOf("tou/accrue") != -1) { // account is blocked
