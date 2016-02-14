@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1206 (2/14/2016)
+// Current version: 0.21.0-1208 (2/14/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1206 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1208 (ALPHA)";
 	
 // multiple account variables
 var dashboardData;
@@ -60,8 +60,8 @@ var stopRunningBingPongFlag = false; // for pausing/stopping
 var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.4.3.0"];
-var bphLatestVersion = "1.4.3.0";
+var bphCompatibleVersions = ["1.5.0.9"];
+var bphLatestVersion = "1.5.0.9";
 var bphInstalled = false;
 
 // license
@@ -120,20 +120,16 @@ function checkBrowserCompatibility(callback) {
 				if (responseFromStable || responseFromCanary) { // BPH is installed
 					bphInstalled = true;
 					
-					// if canary is installed, use it instead of stable
-					if (responseFromCanary) { 
-						bphExtensionID = bphCanaryExtensionID;
-					}
-		
 					// check if the user is using the latest version of BPH (due to compatibility changes)
 					if (responseFromStable && responseFromStable.bphVersion != "test") { 
 						bphInstalledVersion = responseFromStable.bphVersion;
 					}
-		 			
-					if (responseFromCanary && responseFromCanary.bphVersion != "test") { 
+					
+					// if canary is installed and it is compatible, use it instead of stable
+					if (responseFromCanary && bphCompatibleVersions.indexOf(responseFromCanary.bphVersion) != -1) { 
+						bphExtensionID = bphCanaryExtensionID;
 						bphInstalledVersion = responseFromCanary.bphVersion;
 					}
-		 			
 		 			
 					if (bphCompatibleVersions.indexOf(bphInstalledVersion) == -1) {
 						changeStatusText("Please update Bing Pong Helper.", "Version installed: " + bphInstalledVersion, "Latest version: " + bphLatestVersion);
