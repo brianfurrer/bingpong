@@ -101,18 +101,18 @@ bp.HelperTools = (function () {
 		});
 	}
 	
-	function logIntoAccount(username, password) { 
+	function logIntoAccount(username, password, callback) { 
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logIntoAccount", username: username, password: password}, function (response) {
 			callback();
 		});
 	}
 	
-	function logoutOfAccount() { 
+	function logoutOfAccount(callback) { 
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logoutOfAccount"}, function (response) {
 			callback();
 		});
 	
-	function openDashboardForVerifying() { 
+	function openDashboardForVerifying(callback) { 
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboardForVerifying"}, function (response) {
 			callback();
 		});
