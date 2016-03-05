@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.0-1213 (2/14/2016)
+// Current version: 0.21.1-0 (3/4/2016)
 	
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.0-1213 (ALPHA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-0";
 	
 // multiple account variables
 var dashboardData;
@@ -2131,19 +2131,13 @@ function moveSearchCaptchaBack(callback) {
 	});
 }
 
-function bringSearchCaptchaIntoFocus(callback) {
-	chrome.runtime.sendMessage(bphExtensionID, {action: "bringSearchCaptchaIntoFocus"}, function (response) {
-		callback();
-	});
-}
-
 function logIntoAccount(username, password, callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) { 
 	loginAttemptCount++;
 
 	if (loginAttemptCount <= MAX_NUMBER_OF_LOGIN_ATTEMPTS) {
 		// log into the account via Bing Pong Helper
-		chrome.runtime.sendMessage(bphExtensionID, {action: "logIntoAccount", username: username, password: password}, function (response) {
-			chrome.runtime.sendMessage(bphExtensionID, {action: "openDashboardForVerifying"}, function (response) {
+		bp.HelperTools.logIntoAccount(username, password, function () { 
+			bp.HelperTools.openDashboardForVerifying(function () { 
 				verifyLogin(username, password, callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
 			});
   		});
@@ -2156,7 +2150,7 @@ function logIntoAccount(username, password, callbackOnSuccess, callbackOnFailure
 function logoutOfAccount(callbackOnSuccess, callbackOnFailure) {
 	logoutAttemptCount++;
 	if (logoutAttemptCount <= MAX_NUMBER_OF_LOGOUT_ATTEMPTS) { 
-		chrome.runtime.sendMessage(bphExtensionID, {action: "logoutOfAccount"}, function (response) {
+		bp.HelperTools.logoutOfAccount(function () {
 			verifyLogout(callbackOnSuccess, callbackOnFailure);
 		});
 	} else {
@@ -2169,13 +2163,13 @@ function verifyLogin(username, password, callbackOnSuccess, callbackOnFailure, c
 	getDashboardContents(function () {
 		if (dashboardData.indexOf("To see your order history, sign in.") != -1 || dashboardData.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
 			// check to see if the account is just blocked
-			performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
+			bp.HelperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
 				if (contents.indexOf("/proofs/Verify") != -1 || contents.indexOf("/ar/cancel") != -1 || contents.indexOf("tou/accrue") != -1) { // we are actually logged in, but the account is blocked
 					loginAttemptCount = 0;
 					callbackOnBlocked();
 				} else { // we are truly logged out, so make another log-in attempt 
-					logoutOfAccount(function () { 
-						logIntoAccount(username, password, callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
+					bp.HelperTools.logoutOfAccount(function () { 
+						bp.HelperTools.logIntoAccount(username, password, callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
 					}, callbackOnFailure);
 				}
 			});
@@ -2196,7 +2190,7 @@ function verifyLogin(username, password, callbackOnSuccess, callbackOnFailure, c
 }
 
 function verifyLogout(callbackOnSuccess, callbackOnFailure) { 
-	performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
+	bp.HelperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
 		// (note: a minimum of 2 logout attempts is currently enforced to improve logout rate --- this probably is not necessary, but we will try it)
 		if (contents.indexOf("Microsoft account requires JavaScript to sign in.") != -1 && logoutAttemptCount >= 2) { // logged out
 			// return to caller, which will proceed with logging into the account
@@ -2204,82 +2198,6 @@ function verifyLogout(callbackOnSuccess, callbackOnFailure) {
 			callbackOnSuccess();
 		} else { // not logged out, so attempt another logout
 			logoutOfAccount(callbackOnSuccess, callbackOnFailure);
-		}
-	});
-}
-
-function enableMobileMode(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "enableMobileMode"}, function (response) { 
-		callback();
-	});
-}
-
-function disableMobileMode(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "disableMobileMode"}, function (response) { 
-		callback();
-	});
-}	 
-
-function deleteMicrosoftCookies(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "deleteMicrosoftCookies"}, function (response) { 
-		callback();
-	});
-}
-
-function openBPHOptions() { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "openBPHOptions"}, function (response) { 
-		// do nothing
-	});
-}
-
-function openSearchWindow(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "openSearchWindow"}, function (response) {
-		callback();
-	});
-}
-
-function closeSearchWindow(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "closeSearchWindow"}, function (response) {
-		callback();
-	});
-}
-
-function getDictionaryWord(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "getDictionaryWord"}, function (response) { 
-		try { 
-			callback(response.word);
-		} catch (e) { 
-			getDictionaryWord(callback);
-		}
-	});
-}
-
-function getWikiArticles(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "getWikiArticles"}, function (response) { 
-		try { 
-			callback(response.queries);
-		} catch (e) { 
-			getWikiArticles(callback);
-		}
-	});
-}
-
-function performGETRequest(ajaxURL, responseIsJSON, callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "performGETRequest", ajaxURL: ajaxURL, responseIsJSON: responseIsJSON}, function (response) { 
-		try {
-			callback(response);
-		} catch (e) { 
-			performGETRequest(ajaxURL, responseIsJSON, callback);
-		}
-	});
-}
-
-function getSearchWindowContents(callback) { 
-	chrome.runtime.sendMessage(bphExtensionID, {action: "getSearchWindowContents"}, function (response) { 
-		try {
-			callback(response.contents);
-		} catch (e) { 
-			getSearchWindowContents(callback);
 		}
 	});
 }
