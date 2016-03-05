@@ -1,13 +1,13 @@
-bp.HelperTools = (function () { 
+bp.HelperTools = (function () {
 	var _bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
 
-	function openDashboardForCaptcha(callback) { 
+	function openDashboardForCaptcha(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboardForCaptcha"}, function (response) {
 			callback();
 		});
 	}
 
-	function closeDashboardForCaptcha(callback) { 
+	function closeDashboardForCaptcha(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "closeDashboardForCaptcha"}, function (response) {
 			callback();
 		});
@@ -22,102 +22,114 @@ bp.HelperTools = (function () {
 			}
 		});
 	}
-	
+
 	function openSearchCaptcha(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "bringSearchCaptchaIntoFocus"}, function (response) {
 			callback();
 		});
 	}
 
-	function closeSearchCaptcha(callback) { 
+	function closeSearchCaptcha(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "moveSearchCaptchaBack"}, function (response) {
 			callback();
 		});
 	}
 
-	function enableMobileMode(callback) { 
-		chrome.runtime.sendMessage(_bphExtensionID, {action: "enableMobileMode"}, function (response) { 
+	function enableMobileMode(callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "enableMobileMode"}, function (response) {
 			callback();
 		});
 	}
 
-	function disableMobileMode(callback) { 
-		chrome.runtime.sendMessage(_bphExtensionID, {action: "disableMobileMode"}, function (response) { 
-			callback();
-		});
-	}	 
-
-	function deleteMicrosoftCookies(callback) { 
-		chrome.runtime.sendMessage(_bphExtensionID, {action: "deleteMicrosoftCookies"}, function (response) { 
+	function disableMobileMode(callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "disableMobileMode"}, function (response) {
 			callback();
 		});
 	}
 
-	function openBPHOptions() { 
-		chrome.runtime.sendMessage(_bphExtensionID, {action: "openBPHOptions"}, function (response) { 
+	function deleteMicrosoftCookies(callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "deleteMicrosoftCookies"}, function (response) {
+			callback();
+		});
+	}
+
+	function openBPHOptions() {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "openBPHOptions"}, function (response) {
 			// do nothing
 		});
 	}
 
-	function openSearchWindow(callback) { 
+	function openSearchWindow(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openSearchWindow"}, function (response) {
 			callback();
 		});
 	}
 
-	function closeSearchWindow(callback) { 
+	function closeSearchWindow(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "closeSearchWindow"}, function (response) {
 			callback();
 		});
 	}
 
-	function getWikiArticles(callback) { 
-		chrome.runtime.sendMessage(_bphExtensionID, {action: "getWikiArticles"}, function (response) { 
-			try { 
+	function getWikiArticles(callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "getWikiArticles"}, function (response) {
+			try {
 				callback(response.queries);
-			} catch (e) { 
+			} catch (e) {
 				getWikiArticles(callback);
 			}
 		});
 	}
 
-	function performGETRequest(ajaxURL, responseIsJSON, callback) { 
-		chrome.runtime.sendMessage(_bphExtensionID, {action: "performGETRequest", ajaxURL: ajaxURL, responseIsJSON: responseIsJSON}, function (response) { 
+	function performGETRequest(ajaxURL, responseIsJSON, callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "performGETRequest", ajaxURL: ajaxURL, responseIsJSON: responseIsJSON}, function (response) {
 			try {
 				callback(response);
-			} catch (e) { 
+			} catch (e) {
 				performGETRequest(ajaxURL, responseIsJSON, callback);
 			}
 		});
 	}
 
-	function getSearchWindowContents(callback) { 
-		chrome.runtime.sendMessage(_bphExtensionID, {action: "getSearchWindowContents"}, function (response) { 
+	function getSearchWindowContents(callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "getSearchWindowContents"}, function (response) {
 			try {
 				callback(response.contents);
-			} catch (e) { 
+			} catch (e) {
 				getSearchWindowContents(callback);
 			}
 		});
 	}
-	
-	function logIntoAccount(username, password, callback) { 
+
+	function logIntoAccount(username, password, callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logIntoAccount", username: username, password: password}, function (response) {
 			callback();
 		});
 	}
-	
-	function logoutOfAccount(callback) { 
+
+	function logoutOfAccount(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logoutOfAccount"}, function (response) {
 			callback();
 		});
-	
-	function openDashboardForVerifying(callback) { 
+
+	function openDashboardForVerifying(callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboardForVerifying"}, function (response) {
 			callback();
 		});
 	}
-	
+
+	function openDashboard(callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboard"}, function (response) {
+			callback();
+		});
+	}
+
+	function openOutlook(callback) {
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "openOutlook"}, function (response) {
+			callback();
+		});
+	}
+
 	return {
 		openDashboardForCaptcha: openDashboardForCaptcha,
 		closeDashboardForCaptcha: closeDashboardForCaptcha,
@@ -135,6 +147,8 @@ bp.HelperTools = (function () {
 		getSearchWindowContents: getSearchWindowContents,
 		logIntoAccount: logIntoAccount,
 		logoutOfAccount: logoutOfAccount,
-		openDashboardForVerifying: openDashboardForVerifying
+		openDashboardForVerifying: openDashboardForVerifying,
+		openDashboard: openDashboard,
+		openOutlook: openOutlook
 	};
 })();
