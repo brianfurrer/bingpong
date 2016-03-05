@@ -102,7 +102,7 @@ bp.Account = function (user, pass) {
     			bp.Settings.enable();
     			bp.Status.changeText("There was is an issue logging into this account.", "Verify that your account is in good standing and try again.", "&nbsp;");
 
-       			bp.Status.setDefaultTimeout();
+                bp.Status.setDefaultTimeout();
                 /* = setTimeout(function () {
        				changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
        				clearStatusTimeout();
@@ -117,6 +117,48 @@ bp.Account = function (user, pass) {
     			bp.Status.setDefaultTimeout();
        		}, function () { // account needs to solve a CAPTCHA before being able to get credits, which is okay
     			bp.HelperTools.openDashboard(function () {
+    				enableSettings();
+                    bp.Status.restoreDefault();
+    				// changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
+    			});
+       		});
+       	}, function () { // log-out failed
+       		bp.Settings.enable();
+       		bp.Status.changeText("There was is an issue logging out of the previous account.", "This is a bug, and will need to be reported to get fixed.", "&nbsp;");
+       		bp.Status.setDefaultTimeout();
+       	});
+    }
+
+    function launchEmail() {
+    	bp.Settings.disable();
+    	bp.Status.clearDefaultTimeout();
+    	bp.Status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
+
+    	logOut(function () {
+    		logIn(function () { // log-in was successful, so open the dashboard
+    			chrome.runtime.sendMessage(bphExtensionID, {action: "openDashboard"}, function (response) {
+    				bp.Settings.enable();
+    				bp.Status.changeText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
+    			});
+    		}, function () { // log-in failed after two attempts
+    			bp.Settings.enable();
+    			bp.Status.changeText("There was is an issue logging into this account.", "Verify that your account is in good standing and try again.", "&nbsp;");
+
+       			bp.Status.setDefaultTimeout();
+                /* = setTimeout(function () {
+       				changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
+       				clearStatusTimeout();
+       			}, 5000);*/
+       		}, function () { // account is blocked
+                bp.Settings.enable();
+    			bp.Status.changeText("There was is an issue logging into this account.", "This account is blocked and most likely needs SMS verification.", "&nbsp;");
+    			bp.Status.setDefaultTimeout();
+       		}, function () { // account is banned
+                bp.Settings.enable();
+    			bp.Status.changeText("There was is an issue logging into this account.", "This account is banned.", "&nbsp;");
+    			bp.Status.setDefaultTimeout();
+       		}, function () { // account needs to solve a CAPTCHA before being able to get credits, which is okay
+    			bp.HelperTools.openEmail(function () {
     				enableSettings();
                     bp.Status.restoreDefault();
     				// changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
