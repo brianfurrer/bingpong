@@ -1,78 +1,78 @@
 bp.Account = function (user, pass) {
-    // constants
-    var MAX_LOGIN_ATTEMPTS = 5;
-    var MAX_LOGOUT_ATTEMPTS = 5;
+	// constants
+	var MAX_LOGIN_ATTEMPTS = 5;
+	var MAX_LOGOUT_ATTEMPTS = 5;
 
-    // class variables
-    var _username = user;
-    var _password = pass;
-    var _creditCount = 0;
-    var _isRedeemable = false;
+	// class variables
+	var _username = user;
+	var _password = pass;
+	var _creditCount = 0;
+	var _isRedeemable = false;
 
-    // counters
-    var _loginAttemptCount = 0;
-    var _logoutAttemptCount = 0;
+	// counters
+	var _loginAttemptCount = 0;
+	var _logoutAttemptCount = 0;
 
-    function logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
-        _loginAttemptCount++;
+	function logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
+		_loginAttemptCount++;
 
-    	if (_loginAttemptCount <= MAX_NUMBER_OF_LOGIN_ATTEMPTS) {
-    		// log into the account via Bing Pong Helper
-    		bp.HelperTools.logIntoAccount(_username, _password, function () {
-    			bp.HelperTools.openDashboardForVerifying(function () {
-    				verifyLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
-    			});
-      		});
-    	} else {
-    		_loginAttemptCount = 0;
-    		callbackOnFailure();
-    	}
-    }
+		if (_loginAttemptCount <= MAX_NUMBER_OF_LOGIN_ATTEMPTS) {
+			// log into the account via Bing Pong Helper
+			bp.HelperTools.logIntoAccount(_username, _password, function () {
+				bp.HelperTools.openDashboardForVerifying(function () {
+					verifyLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
+				});
+			});
+		} else {
+			_loginAttemptCount = 0;
+			callbackOnFailure();
+		}
+	}
 
-    function logOut(callbackOnSuccess, callbackOnFailure) {
-    	_logoutAttemptCount++;
+	function logOut(callbackOnSuccess, callbackOnFailure) {
+		_logoutAttemptCount++;
 
-    	if (_logoutAttemptCount <= MAX_NUMBER_OF_LOGOUT_ATTEMPTS) {
-    		bp.HelperTools.logoutOfAccount(function () {
-                verifyLogout(callbackOnSuccess, callbackOnFailure);
-    		});
-    	} else {
-    		logoutAttemptCount = 0;
-    		callbackOnFailure();
-    	}
-    }
+		if (_logoutAttemptCount <= MAX_NUMBER_OF_LOGOUT_ATTEMPTS) {
+			bp.HelperTools.logoutOfAccount(function () {
+				verifyLogout(callbackOnSuccess, callbackOnFailure);
+			});
+		} else {
+			logoutAttemptCount = 0;
+			callbackOnFailure();
+		}
+	}
 
-    function checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
-    	bp.Dashboard.updateDashboardData(function () {
-            var dashboardData = bp.Dashboard.getDashboardData();
+	function checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
+		bp.Dashboard.updateDashboardData(function () {
+			var dashboardData = bp.Dashboard.getDashboardData();
 
-    		if (dashboardData.indexOf("To see your order history, sign in.") != -1 || dashboardData.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
-    			// check to see if the account is just blocked
-    			bp.HelperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
-    				if (contents.indexOf("/proofs/Verify") != -1 || contents.indexOf("/ar/cancel") != -1 || contents.indexOf("tou/accrue") != -1) { // we are actually logged in, but the account is blocked
-    					_loginAttemptCount = 0;
-    					callbackOnBlocked();
-    				} else { // we are truly logged out, so make another log-in attempt
-    					logOut(function () { // make another log out attempt just to be sure
-    						logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
-    					}, callbackOnFailure);
-    				}
-    			});
-    		} else if (dashboardData.indexOf("/proofs/Verify") != -1 || dashboardData.indexOf("/ar/cancel") != -1 || dashboardData.indexOf("tou/accrue") != -1) { // account is blocked
-    			_loginAttemptCount = 0;
-    			callbackOnBlocked();
-    		} else if (dashboardData.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
-    			_loginAttemptCount = 0;
-    			callbackOnBanned();
-    		} else if (dashboardData.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
-    			_loginAttemptCount = 0;
-    			callbackOnCaptcha();
-    		} else { // all good, so continue
-    			_loginAttemptCount = 0;
-    			callbackOnSuccess();
-    		}
-    	});
-    }
+			if (dashboardData.indexOf("To see your order history, sign in.") != -1 || dashboardData.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
+				// check to see if the account is just blocked
+				bp.HelperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
+					if (contents.indexOf("/proofs/Verify") != -1 || contents.indexOf("/ar/cancel") != -1 || contents.indexOf("tou/accrue") != -1) { // we are actually logged in, but the account is blocked
+						_loginAttemptCount = 0;
+						callbackOnBlocked();
+					} else { // we are truly logged out, so make another log-in attempt
+						logOut(function () { // make another log out attempt just to be sure
+							logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
+						}, callbackOnFailure);
+					}
+				});
+			} else if (dashboardData.indexOf("/proofs/Verify") != -1 || dashboardData.indexOf("/ar/cancel") != -1 || dashboardData.indexOf("tou/accrue") != -1) { // account is blocked
+				_loginAttemptCount = 0;
+				callbackOnBlocked();
+			} else if (dashboardData.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
+				_loginAttemptCount = 0;
+				callbackOnBanned();
+			} else if (dashboardData.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
+				_loginAttemptCount = 0;
+				callbackOnCaptcha();
+			} else { // all good, so continue
+				_loginAttemptCount = 0;
+				callbackOnSuccess();
+			}
+		});
+	}
 
     function checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure) {
     	bp.HelperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
@@ -100,7 +100,7 @@ bp.Account = function (user, pass) {
     			});
     		}, function () { // log-in failed after two attempts
     			bp.Settings.enable();
-    			bp.Status.changeText("There was is an issue logging into this account.", "Verify that your account is in good standing and try again.", "&nbsp;");
+                bp.Status.changeText("There was is an issue logging into this account.", "Verify that your account is in good standing and try again.", "&nbsp;");
 
                 bp.Status.setDefaultTimeout();
                 /* = setTimeout(function () {
@@ -159,7 +159,7 @@ bp.Account = function (user, pass) {
     			bp.Status.setDefaultTimeout();
        		}, function () { // account needs to solve a CAPTCHA before being able to get credits, which is okay
     			bp.HelperTools.openEmail(function () {
-    				enableSettings();
+					enableSettings();
                     bp.Status.restoreDefault();
     				// changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
     			});
