@@ -1,8 +1,57 @@
 bp.helperTools = (function () {
+	var NOT_CHECKED = -1;
+	
 	var _bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
+	var _installedHelperVersion = NOT_CHECKED;
+	var _compatibleHelperVersions = ["1.5.0.10", "1.5.0.11", "1.5.1.3", "1.6.0.1", "1.6.1.75"];
+	var _latestHelperVersion = "1.6.1.75";
+	var _helperInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
+	var _helperIsInstalled = NOT_CHECKED;
 	
 	var helperTools = {};
-
+	
+	helperTools.getInstalledHelperVersion = function () { 
+		if (_installedHelperVersion !== NOT_CHECKED) { 
+			return _installedHelperVersion;
+		} else {
+			throw "Exception (bp.helperTools): bp.helperTools.updateHelperInstallationStatus() must be called at least once before calling bp.helperTools.getInstalledHelperVersion()!";
+		}
+	}
+	
+	helperTools.getLatestHelperVersion = function () { 
+		return _latestHelperVersion;
+	}
+	
+	helperTools.getHelperInstallURL = function () { 
+		return _helperInstallURL;
+	}
+	
+	helperTools.isUsingCompatibleHelperVersion = function () { 
+		return (_compatibleHelperVersions.indexOf(_installedHelperVersion) !== -1);
+	}
+	
+	// non-cached version
+	helperTools.updateHelperInstallationStatus = function (callback) { 
+		chrome.runtime.sendMessage(_bphExtensionID, {action: "testBPH"}, function (response) {
+			if (response !== undefined) { // bph is installed
+				callback(true);
+				_installedVersion = response.bphVersion;
+			} else {
+				callback(false);
+				_installedVersion = null;
+			}
+		});
+	}
+	
+	// cached version
+	helperTools.getHelperInstallationStatus = function () {
+		if (_helperIsInstalled !== NOT_CHECKED) { 
+			return _helperIsInstalled;
+		} else {
+			throw "Exception (bp.helperTools): bp.helperTools.updateHelperInstallationStatus() must be called at least once before calling bp.helperTools.getHelperInstallationStatus()!";
+		}
+	}
+		
 	helperTools.openDashboardForCaptcha = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboardForCaptcha"}, function (response) {
 			callback();

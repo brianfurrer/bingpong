@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-14 (3/16/2016)
+// Current version: 0.21.1-15 (3/16/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-14 (BETA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-15 (BETA)";
 
 // multiple account variables
 var dashboardData;
@@ -56,12 +56,6 @@ var numberOfDesktopSearches = 35;
 var numberOfMobileSearches = 20;
 var stopRunningBingPongFlag = false; // for pausing/stopping
 
-// bing pong helper variables
-var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.5.0.10", "1.5.0.11", "1.5.1.3", "1.6.0.1", "1.6.1.75"];
-var bphLatestVersion = "1.6.1.75";
-var bphInstalled = false;
-
 checkBrowserCompatibility(function () {
 	// currently do nothing
 });
@@ -76,35 +70,22 @@ function checkBrowserCompatibility(callback) {
 
 	// it seems like Chrome is the only browser that can properly strip the referrer header with <meta name="referrer" content="never">
 	// as a result, searches on any other browser will be sent through REDIRECT_SERVICE before they get sent to Bing
-	if (window.chrome && chrome.runtime) {
+	if (chrome && chrome.runtime) {
 		redirectionServiceRequired = 0;
-		var bphInstalledVersion = "N/A";
+		var bp.helperTools.getHelperInstallionStatus()Version = "N/A";
 
 		// enable the BPH options button
 		// if BPH is not installed, this will be an install button
 		document.getElementById('bphOptionsButton').disabled = false;
 
 		// check for BPH (both stable and canary)
-		chrome.runtime.sendMessage(bphExtensionID, {action: "testBPH"}, function (responseFromStable) {
-			chrome.runtime.sendMessage(bphCanaryExtensionID, {action: "testBPH"}, function (responseFromCanary) {
-				var bphInstalledVersion = "N/A";
+		bp.helperTools.updateHelperInstallationStatus(function (bp.helperTools.getHelperInstallionStatus()) { 
+			if (bp.helperTools.getHelperInstallionStatus()) { 
+				var installedHelperVersion = bp.helperTools.getInstalledHelperVersion();
+				var latestHelperVersion = bp.helperTools.getLatestHelperVersion();
 
-				if (responseFromStable || responseFromCanary) { // BPH is installed
-					bphInstalled = true;
-
-					// check if the user is using the latest version of BPH (due to compatibility changes)
-					if (responseFromStable && responseFromStable.bphVersion != "test") {
-						bphInstalledVersion = responseFromStable.bphVersion;
-					}
-
-					// if canary is installed and it is compatible, use it instead of stable
-					if (responseFromCanary && bphCompatibleVersions.indexOf(responseFromCanary.bphVersion) != -1) {
-						bphExtensionID = bphCanaryExtensionID;
-						bphInstalledVersion = responseFromCanary.bphVersion;
-					}
-
-					if (bphCompatibleVersions.indexOf(bphInstalledVersion) == -1) {
-						changeStatusText("Please update Bing Pong Helper.", "Version installed: " + bphInstalledVersion, "Latest version: " + bphLatestVersion);
+					if (!bp.helperTools.isUsingCompatibleHelperVersion()) {
+						changeStatusText("Please update Bing Pong Helper.", "Version installed: " + installedHelperVersion, "Latest version: " + latestHelperVersion);
 					}
 
 					window.onunload = function () {
@@ -112,43 +93,42 @@ function checkBrowserCompatibility(callback) {
 							// do nothing else
 						});
 					};
-				} else { // BPH is not installed, but Chrome is being used
-					// change the BPH options button into an install button
-					document.getElementById('bphOptionsButton').value = "Install Bing Pong Helper";
-					document.getElementById('bphOptionsButton').onclick = function () {
-						chrome.webstore.install(bphInstallURL, function () { // successful install
-							// refresh the page
-							setTimeout(function () {
-								location.reload();
-							}, 5000);
-						}, function (details) { // install failed
-							// do nothing at this time
-						});
-					};
-				}
-
-				if (!bphInstalled || bphCompatibleVersions.indexOf(bphInstalledVersion) != -1) {
-					bp.licensing.updateLicenseStatus(function (isLicensed) {
-						// remove ads for licensed users
-						setCookie("removeAd", isLicensed);
-						
-						if (isLicensed) {
-							try {
-								document.getElementById('ad').style.display = "none";
-							} catch (e) {};
-						}
-						
-						parseCookieInfo(function () {
-							if (!document.getElementById('runOnPageLoadOption').checked) {
-								enableSettings();
-								changeStatusText(DEFAULT_STATUS_TEXT, "DO_NOT_CHANGE", "DO_NOT_CHANGE");
-							}
-
-							callback();
-						});
+			} else { // BPH is not installed, but Chrome is being used
+				// change the BPH options button into an install button
+				document.getElementById('bphOptionsButton').value = "Install Bing Pong Helper";
+				document.getElementById('bphOptionsButton').onclick = function () {
+					chrome.webstore.install(bphInstallURL, function () { // successful install
+						// refresh the page
+						setTimeout(function () {
+							location.reload();
+						}, 5000);
+					}, function (details) { // install failed
+						// do nothing at this time
 					});
-				}
-			});
+				};
+			}
+
+			if (!bp.helperTools.getHelperInstallionStatus() || bp.helperTools.isUsingCompatibleHelperVersion()) {
+				bp.licensing.updateLicenseStatus(function (isLicensed) {
+					// remove ads for licensed users
+					setCookie("removeAd", isLicensed);
+					
+					if (isLicensed) {
+						try {
+							document.getElementById('ad').style.display = "none";
+						} catch (e) {};
+					}
+					
+					parseCookieInfo(function () {
+						if (!document.getElementById('runOnPageLoadOption').checked) {
+							enableSettings();
+							changeStatusText(DEFAULT_STATUS_TEXT, "DO_NOT_CHANGE", "DO_NOT_CHANGE");
+						}
+
+						callback();
+					});
+				});
+			}
 		});
 	} else {
 		parseCookieInfo(function () {
@@ -181,7 +161,7 @@ function parseCookieInfo(callback) {
 		}
 	}
 
-	if (bphInstalled) {
+	if (bp.helperTools.getHelperInstallionStatus()) {
 		enterAutoInSearchBoxes();
 		disableSearchOptions();
 	} else {
@@ -209,7 +189,7 @@ function parseCookieInfo(callback) {
 		document.getElementById('accountsPerIP').selectedIndex = getCookie("accountsPerIP");
 	}
 
-	if (bphInstalled) {
+	if (bp.helperTools.getHelperInstallionStatus()) {
 		if (getCookie("useMultipleAccounts") === "MULTIPLE_ACCOUNTS.ENABLED") {
 			document.getElementById('multipleAccountsOption').checked = true;
 			document.getElementById('runInRandomOrderOption').disabled = false;
@@ -316,7 +296,7 @@ function onSettingsChange() {
 	// check for invalid input in the min/max wait time and number of searches boxes, and disable the "Run Bing Pong" button if errors are found
 	if (isNaN(parseFloat(document.getElementById('minSearchDelayTime').value)) ||
 	isNaN(parseFloat(document.getElementById('maxSearchDelayTime').value)) ||
-	(isNaN(parseFloat(document.getElementById('numberOfDesktopSearches').value)) && !bphInstalled) ||
+	(isNaN(parseFloat(document.getElementById('numberOfDesktopSearches').value)) && !bp.helperTools.getHelperInstallionStatus()) ||
 	(parseFloat(document.getElementById('minSearchDelayTime').value) > parseFloat(document.getElementById('maxSearchDelayTime').value)) ||
 	document.getElementById('minSearchDelayTime').value == "" ||
 	document.getElementById('maxSearchDelayTime').value == "") {
@@ -659,7 +639,7 @@ function performThisStep(stepNumber) {
 		} else if (stepNumber == 4) { // perform PC searches
 			changeStatusText("DO_NOT_CHANGE", "&nbsp;", "DO_NOT_CHANGE");
 
-			if (bphInstalled) {
+			if (bp.helperTools.getHelperInstallionStatus()) {
 				// GA tracking
 				ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', regularSearchesToPerform);
 
@@ -816,7 +796,7 @@ function runBingPong() {
 
 		// run the bot
 		performThisStep(0);
-	} else if (bphInstalled) { // bph is installed, but multiple accounts is not checked
+	} else if (bp.helperTools.getHelperInstallionStatus()) { // bph is installed, but multiple accounts is not checked
 		performThisStep(2);
 	} else { // run in "legacy" mode
 		performThisStep(3);
@@ -828,7 +808,7 @@ function finishRunningBingPong() {
 
 	enableSettings();
 
-	if (bphInstalled) {
+	if (bp.helperTools.getHelperInstallionStatus()) {
 		if (location.href.indexOf("?runonpageload=1") != -1) {
 			// Bing Pong was told to run by Bing Pong Helper automatically, so close the window
 			chrome.runtime.sendMessage(bphExtensionID, {action: "closeBPWindow"}, function (response) {});
@@ -1003,7 +983,7 @@ function generateSearchURL(doMobileSearches, callback) {
 	var searchExpression;
 
 	// use a random wiki article if BPH is installed, and a trending search term otherwise
-	if (bphInstalled) {
+	if (bp.helperTools.getHelperInstallionStatus()) {
 		if (dictionary && dictionary.length) { // if there are search terms remaining from the last time we got the wiki articles
 			// just use one of those to make a search
 			searchExpression = ((dictionary.pop()).split(" ")).join("+"); // replace spaces with pluses
@@ -1552,7 +1532,7 @@ function verifyAccountInfo(username, password, callbackOnValid, callbackOnInvali
 function enableSearchOptions() {
 	document.getElementById('numberOfDesktopSearches').disabled = false;
 
-	if (bphInstalled) {
+	if (bp.helperTools.getHelperInstallionStatus()) {
 		document.getElementById('numberOfMobileSearches').disabled = false;
 	}
 }
@@ -1599,7 +1579,7 @@ function enableSettings() {
 		}
 	}
 
-	if (bphInstalled) {
+	if (bp.helperTools.getHelperInstallionStatus()) {
 		// enable dashboard tasks and multiple accounts, since they do not need a license
 		document.getElementById('dashboardTasksOption').disabled = false;
 		document.getElementById('multipleAccountsOption').disabled = false;
