@@ -74,18 +74,18 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-    function checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure) {
-    	bp.HelperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
-    		// (note: a minimum of 2 logout attempts is currently enforced to improve logout rate --- this probably is not necessary, but we will try it)
-    		if (contents.indexOf("Microsoft account requires JavaScript to sign in.") != -1 && _logoutAttemptCount >= 2) { // logged out
-    			// return to caller, which will proceed with logging into the account
-    			_logoutAttemptCount = 0;
-    			callbackOnSuccess();
-    		} else { // not logged out, so attempt another logout
-    			logOut(callbackOnSuccess, callbackOnFailure);
-    		}
-    	});
-    }
+	function checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure) {
+		bp.HelperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
+			// (note: a minimum of 2 logout attempts is currently enforced to improve logout rate --- this probably is not necessary, but we will try it)
+			if (contents.indexOf("Microsoft account requires JavaScript to sign in.") != -1 && _logoutAttemptCount >= 2) { // logged out
+				// return to caller, which will proceed with logging into the account
+				_logoutAttemptCount = 0;
+				callbackOnSuccess();
+			} else { // not logged out, so attempt another logout
+				logOut(callbackOnSuccess, callbackOnFailure);
+			}
+		});
+	}
 
     function launchDashboard() {
     	bp.Settings.disable();
