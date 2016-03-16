@@ -72,15 +72,14 @@ function checkBrowserCompatibility(callback) {
 	// as a result, searches on any other browser will be sent through REDIRECT_SERVICE before they get sent to Bing
 	if (chrome && chrome.runtime) {
 		redirectionServiceRequired = 0;
-		var bp.helperTools.getHelperInstallionStatus()Version = "N/A";
 
 		// enable the BPH options button
 		// if BPH is not installed, this will be an install button
 		document.getElementById('bphOptionsButton').disabled = false;
 
 		// check for BPH (both stable and canary)
-		bp.helperTools.updateHelperInstallationStatus(function (bp.helperTools.getHelperInstallionStatus()) { 
-			if (bp.helperTools.getHelperInstallionStatus()) { 
+		bp.helperTools.updateHelperInstallationStatus(function (bphIsInstalled) { 
+			if (bphIsInstalled) { 
 				var installedHelperVersion = bp.helperTools.getInstalledHelperVersion();
 				var latestHelperVersion = bp.helperTools.getLatestHelperVersion();
 
