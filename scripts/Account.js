@@ -12,15 +12,29 @@ bp.Account = function (user, pass) {
 	// counters
 	var _loginAttemptCount = 0;
 	var _logoutAttemptCount = 0;
+	
+	var a = {};
+	
+	a.getUsername = function () { 
+		return _username;
+	}
+	
+	a.getCreditCount = function () { 
+		return _creditCount;
+	}
+	
+	a.getRedeemabilityStatus = function () { 
+		return _isRedeemable;
+	}
 
-	function logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
+	a.logIn = function (callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
 		_loginAttemptCount++;
 
 		if (_loginAttemptCount <= MAX_NUMBER_OF_LOGIN_ATTEMPTS) {
 			// log into the account via Bing Pong Helper
 			bp.helperTools.logIntoAccount(_username, _password, function () {
 				bp.helperTools.openDashboardForVerifying(function () {
-					checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
+					_checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
 				});
 			});
 		} else {
@@ -29,12 +43,12 @@ bp.Account = function (user, pass) {
 		}
 	}
 
-	function logOut(callbackOnSuccess, callbackOnFailure) {
+	a.logOut = function (callbackOnSuccess, callbackOnFailure) {
 		_logoutAttemptCount++;
 
 		if (_logoutAttemptCount <= MAX_NUMBER_OF_LOGOUT_ATTEMPTS) {
 			bp.helperTools.logoutOfAccount(function () {
-				checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure);
+				_checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure);
 			});
 		} else {
 			_logoutAttemptCount = 0;
@@ -42,7 +56,7 @@ bp.Account = function (user, pass) {
 		}
 	}
 
-	function checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
+	function _checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
 		bp.rewardsDashboard.updateDashboardData(function () {
 			var dashboardData = bp.rewardsDashboard.getDashboardData();
 
@@ -74,7 +88,7 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	function checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure) {
+	function _checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure) {
 		bp.helperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
 			// (note: a minimum of 2 logout attempts is currently enforced to improve logout rate --- this probably is not necessary, but we will try it)
 			if (contents.indexOf("Microsoft account requires JavaScript to sign in.") != -1 && _logoutAttemptCount >= 2) { // logged out
@@ -87,7 +101,7 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	function launchDashboard() {
+	a.launchDashboard = function () {
 		bp.settings.disable();
 		bp.status.clearDefaultTimeout();
 		bp.status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
@@ -129,7 +143,7 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	function launchEmail() {
+	a.launchEmail = function () {
 		bp.settings.disable();
 		bp.status.clearDefaultTimeout();
 		bp.status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
@@ -171,7 +185,9 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	function launchCaptcha() {
+	a.launchCaptcha = function () {
 		// to-do
 	}
+	
+	return a;
 }
