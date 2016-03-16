@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-15 (3/16/2016)
+// Current version: 0.21.1-17 (3/16/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-15 (BETA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-17 (BETA)";
 
 // multiple account variables
 var dashboardData;
@@ -110,7 +110,7 @@ function checkBrowserCompatibility(callback) {
 			if (!bp.helperTools.getHelperInstallionStatus() || bp.helperTools.isUsingCompatibleHelperVersion()) {
 				bp.licensing.updateLicenseStatus(function (isLicensed) {
 					// remove ads for licensed users
-					setCookie("removeAd", isLicensed);
+					bp.cookies.set("removeAd", isLicensed);
 					
 					if (isLicensed) {
 						try {
@@ -140,23 +140,23 @@ function checkBrowserCompatibility(callback) {
 
 function parseCookieInfo(callback) {
 	// delete the bad "auto" cookies
-	if (getCookie("numberOfDesktopSearches")) {
-		if (isNaN(getCookie("numberOfDesktopSearches"))) {
-			deleteCookie("numberOfDesktopSearches");
+	if (bp.cookies.get("numberOfDesktopSearches")) {
+		if (isNaN(bp.cookies.get("numberOfDesktopSearches"))) {
+			bp.cookies.remove("numberOfDesktopSearches");
 		} else {
-			document.getElementById('numberOfDesktopSearches').value = getCookie("numberOfDesktopSearches");
-			numberOfDesktopSearches = getCookie("numberOfDesktopSearches");
+			document.getElementById('numberOfDesktopSearches').value = bp.cookies.get("numberOfDesktopSearches");
+			numberOfDesktopSearches = bp.cookies.get("numberOfDesktopSearches");
 			document.getElementById('runBingPongButton').value = "Run Bing Pong (" + numberOfDesktopSearches + " searches)";
 		}
 	}
 
-	if (getCookie("numberOfMobileSearches")) {
+	if (bp.cookies.get("numberOfMobileSearches")) {
 		// delete the bad "auto" cookies
-		if (isNaN(getCookie("numberOfMobileSearches"))) {
-			deleteCookie("numberOfMobileSearches");
+		if (isNaN(bp.cookies.get("numberOfMobileSearches"))) {
+			bp.cookies.remove("numberOfMobileSearches");
 		} else { // good cookie
-			document.getElementById('numberOfMobileSearches').value = getCookie("numberOfMobileSearches");
-			numberOfMobileSearches = getCookie("numberOfMobileSearches");
+			document.getElementById('numberOfMobileSearches').value = bp.cookies.get("numberOfMobileSearches");
+			numberOfMobileSearches = bp.cookies.get("numberOfMobileSearches");
 		}
 	}
 
@@ -168,28 +168,28 @@ function parseCookieInfo(callback) {
 		disableMobileSearchOption();
 	}
 
-	if (getCookie("useSearchDelay") === "SEARCH_DELAY.ENABLED") {
+	if (bp.cookies.get("useSearchDelay") === "SEARCH_DELAY.ENABLED") {
 		document.getElementById('useSearchDelayOption').checked = true;
 		document.getElementById('minSearchDelayTime').disabled = false;
 		document.getElementById('maxSearchDelayTime').disabled = false;
 	}
 
-	if (getCookie("minSearchDelayTime")) {
-		minSearchDelayTime = getCookie("minSearchDelayTime");
+	if (bp.cookies.get("minSearchDelayTime")) {
+		minSearchDelayTime = bp.cookies.get("minSearchDelayTime");
 		document.getElementById('minSearchDelayTime').value = minSearchDelayTime;
 	}
 
-	if (getCookie("maxSearchDelayTime")) {
-		maxSearchDelayTime = getCookie("maxSearchDelayTime");
+	if (bp.cookies.get("maxSearchDelayTime")) {
+		maxSearchDelayTime = bp.cookies.get("maxSearchDelayTime");
 		document.getElementById('maxSearchDelayTime').value = maxSearchDelayTime;
 	}
 
-	if (getCookie("accountsPerIP") >= 0) {
-		document.getElementById('accountsPerIP').selectedIndex = getCookie("accountsPerIP");
+	if (bp.cookies.get("accountsPerIP") >= 0) {
+		document.getElementById('accountsPerIP').selectedIndex = bp.cookies.get("accountsPerIP");
 	}
 
 	if (bp.helperTools.getHelperInstallionStatus()) {
-		if (getCookie("useMultipleAccounts") === "MULTIPLE_ACCOUNTS.ENABLED") {
+		if (bp.cookies.get("useMultipleAccounts") === "MULTIPLE_ACCOUNTS.ENABLED") {
 			document.getElementById('multipleAccountsOption').checked = true;
 			document.getElementById('runInRandomOrderOption').disabled = false;
 			document.getElementById('pauseOnCaptchaOption').disabled = false;
@@ -202,34 +202,34 @@ function parseCookieInfo(callback) {
 			updateAccountManagerDisplay();
 		}
 
-		if (getCookie("doDashboardTasks") === "DASHBOARD_TASKS.ENABLED") {
+		if (bp.cookies.get("doDashboardTasks") === "DASHBOARD_TASKS.ENABLED") {
 			document.getElementById('dashboardTasksOption').checked = true;
 		}
 
-		if (getCookie("pauseOnCaptcha") === "PAUSE_ON_CAPTCHA.ENABLED" && (bp.licensing.getLicenseStatus() || true)) {
+		if (bp.cookies.get("pauseOnCaptcha") === "PAUSE_ON_CAPTCHA.ENABLED" && (bp.licensing.getLicenseStatus() || true)) {
 			document.getElementById('pauseOnCaptchaOption').checked = true;
 		}
 
-		if (getCookie("waitForIPChange") === "WAIT_FOR_IP_CHANGE.ENABLED" && document.getElementById('multipleAccountsOption').checked && (bp.licensing.getLicenseStatus() || true)) {
+		if (bp.cookies.get("waitForIPChange") === "WAIT_FOR_IP_CHANGE.ENABLED" && document.getElementById('multipleAccountsOption').checked && (bp.licensing.getLicenseStatus() || true)) {
 			document.getElementById('waitForIPChangeOption').checked = true;
 			document.getElementById('accountsPerIP').disabled = false;
 		}
 
-		if (getCookie("runInRandomOrder") === "RUN_IN_RANDOM_ORDER.ENABLED" && document.getElementById('multipleAccountsOption').checked) {
+		if (bp.cookies.get("runInRandomOrder") === "RUN_IN_RANDOM_ORDER.ENABLED" && document.getElementById('multipleAccountsOption').checked) {
 			document.getElementById('runInRandomOrderOption').checked = true;
 		}
 
-		if (getCookie("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
+		if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
 			document.getElementById('runOnPageLoadOption').checked = true;
 		}
 
-		if (getCookie("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED" || location.href.indexOf("?runonpageload=1") != -1) {
+		if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED" || location.href.indexOf("?runonpageload=1") != -1) {
 			setTimeout(runBingPong, 1000);
 		}
 
 		callback();
 	} else {
-		if (getCookie("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
+		if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
 			document.getElementById('runOnPageLoadOption').checked = true;
 			runBingPong();
 		}
@@ -253,29 +253,29 @@ function changeStatusText(statusText, remainingText, extraText) {
 }
 
 function saveSettings() {
-   	setCookie("useMultipleAccounts", (document.getElementById('multipleAccountsOption').checked ? "MULTIPLE_ACCOUNTS.ENABLED" : "MULTIPLE_ACCOUNTS.DISABLED"));
-   	setCookie("doDashboardTasks", (document.getElementById('dashboardTasksOption').checked ? "DASHBOARD_TASKS.ENABLED" : "DASHBOARD_TASKS.DISABLED"));
-   	setCookie("pauseOnCaptcha", (document.getElementById('pauseOnCaptchaOption').checked ? "PAUSE_ON_CAPTCHA.ENABLED" : "PAUSE_ON_CAPTCHA.DISABLED"));
-   	setCookie("useSearchDelay", (document.getElementById('useSearchDelayOption').checked ? "SEARCH_DELAY.ENABLED" : "SEARCH_DELAY.DISABLED"));
-   	setCookie("runOnPageLoad", (document.getElementById('runOnPageLoadOption').checked ? "RUN_ON_PAGE_LOAD.ENABLED" : "RUN_ON_PAGE_LOAD.DISABLED"));
-   	setCookie("waitForIPChange", (document.getElementById('waitForIPChangeOption').checked ? "WAIT_FOR_IP_CHANGE.ENABLED" : "WAIT_FOR_IP_CHANGE.DISABLED"));
-	setCookie("accountsPerIP", document.getElementById('accountsPerIP').selectedIndex);
-	setCookie("runInRandomOrder", (document.getElementById('runInRandomOrderOption').checked ? "RUN_IN_RANDOM_ORDER.ENABLED" : "RUN_IN_RANDOM_ORDER.DISABLED"));
+   	bp.cookies.set("useMultipleAccounts", (document.getElementById('multipleAccountsOption').checked ? "MULTIPLE_ACCOUNTS.ENABLED" : "MULTIPLE_ACCOUNTS.DISABLED"));
+   	bp.cookies.set("doDashboardTasks", (document.getElementById('dashboardTasksOption').checked ? "DASHBOARD_TASKS.ENABLED" : "DASHBOARD_TASKS.DISABLED"));
+   	bp.cookies.set("pauseOnCaptcha", (document.getElementById('pauseOnCaptchaOption').checked ? "PAUSE_ON_CAPTCHA.ENABLED" : "PAUSE_ON_CAPTCHA.DISABLED"));
+   	bp.cookies.set("useSearchDelay", (document.getElementById('useSearchDelayOption').checked ? "SEARCH_DELAY.ENABLED" : "SEARCH_DELAY.DISABLED"));
+   	bp.cookies.set("runOnPageLoad", (document.getElementById('runOnPageLoadOption').checked ? "RUN_ON_PAGE_LOAD.ENABLED" : "RUN_ON_PAGE_LOAD.DISABLED"));
+   	bp.cookies.set("waitForIPChange", (document.getElementById('waitForIPChangeOption').checked ? "WAIT_FOR_IP_CHANGE.ENABLED" : "WAIT_FOR_IP_CHANGE.DISABLED"));
+	bp.cookies.set("accountsPerIP", document.getElementById('accountsPerIP').selectedIndex);
+	bp.cookies.set("runInRandomOrder", (document.getElementById('runInRandomOrderOption').checked ? "RUN_IN_RANDOM_ORDER.ENABLED" : "RUN_IN_RANDOM_ORDER.DISABLED"));
 
 	// do not save invalid input
 	if (parseFloat(document.getElementById('minSearchDelayTime').value) != NaN &&
 		parseFloat(document.getElementById('maxSearchDelayTime').value) != NaN &&
 		parseFloat(document.getElementById('minSearchDelayTime').value) < parseFloat(document.getElementById('maxSearchDelayTime').value)) {
-		setCookie("minSearchDelayTime", document.getElementById('minSearchDelayTime').value);
-		setCookie("maxSearchDelayTime", document.getElementById('maxSearchDelayTime').value);
+		bp.cookies.set("minSearchDelayTime", document.getElementById('minSearchDelayTime').value);
+		bp.cookies.set("maxSearchDelayTime", document.getElementById('maxSearchDelayTime').value);
    	}
 
    	if (!isNaN(document.getElementById('numberOfDesktopSearches').value)) {
-		setCookie("numberOfDesktopSearches", document.getElementById('numberOfDesktopSearches').value);
+		bp.cookies.set("numberOfDesktopSearches", document.getElementById('numberOfDesktopSearches').value);
    	}
 
 	if (!isNaN(document.getElementById('numberOfMobileSearches').value)) {
-		setCookie("numberOfMobileSearches", document.getElementById('numberOfMobileSearches').value);
+		bp.cookies.set("numberOfMobileSearches", document.getElementById('numberOfMobileSearches').value);
    	}
 
 	// clear the "settings have been changed..." timer
@@ -358,14 +358,14 @@ function onSettingsChange() {
 }
 
 function onGlobalCheckmarkChange() {
-	setCookie("globalCheck", document.getElementById('globalCheckmark').checked);
+	bp.cookies.set("globalCheck", document.getElementById('globalCheckmark').checked);
 
-	for (var i = 1; getCookie("check" + i); i++) {
+	for (var i = 1; bp.cookies.get("check" + i); i++) {
 		if (i > 5 && !bp.licensing.getLicenseStatus()) {
 			break;
 		}
 
-		setCookie("check" + i, document.getElementById('globalCheckmark').checked);
+		bp.cookies.set("check" + i, document.getElementById('globalCheckmark').checked);
 	}
 
 	updateAccountManagerDisplay();
@@ -373,33 +373,33 @@ function onGlobalCheckmarkChange() {
 
 function onAccountCheckmarksChange() {
 	// delete the old checkmark cookies
-	deleteCookie("globalCheck");
+	bp.cookies.remove("globalCheck");
 
-	for (var i = 1; getCookie("check" + i); i++) {
-		deleteCookie("check" + i);
+	for (var i = 1; bp.cookies.get("check" + i); i++) {
+		bp.cookies.remove("check" + i);
 	}
 
 	// set the checkmark cookies
 	for (var i = 1; i <= accountCount; i++) {
-		setCookie("check" + i, document.getElementById('check' + i).checked);
+		bp.cookies.set("check" + i, document.getElementById('check' + i).checked);
 	}
 
 	// set the global checkmark cookie
 	var globalCheckmarkValue = true;
 
-	for (var i = 1; getCookie("check" + i); i++) {
+	for (var i = 1; bp.cookies.get("check" + i); i++) {
 		// only consider the first five accounts when there is no license
 		if (i > 5 && !bp.licensing.getLicenseStatus()) {
 			break;
 		}
 
-		if (!getCookie("check" + i) || getCookie("check" + i) === "false") {
+		if (!bp.cookies.get("check" + i) || bp.cookies.get("check" + i) === "false") {
 			globalCheckmarkValue = false;
 			break;
 		}
 	}
 
-	setCookie("globalCheck", globalCheckmarkValue);
+	bp.cookies.set("globalCheck", globalCheckmarkValue);
 
 	// update the account manager display
 	updateAccountManagerDisplay();
@@ -434,7 +434,7 @@ function updateCreditCounter(data, useSearchWindowData) {
 		accountRedeemStatuses[currentAccountIndex] = isRedeemable;
 
 		// store the redeemability status in a cookie
-		setCookie("isRedeemable" + currentAccountIndex, isRedeemable);
+		bp.cookies.set("isRedeemable" + currentAccountIndex, isRedeemable);
 
 		// update the credit counter display to reflect the redeemability status
 		document.getElementById('credits' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
@@ -442,7 +442,7 @@ function updateCreditCounter(data, useSearchWindowData) {
 	}
 
    	// store the credit count in a cookie
-   	setCookie("credits" + currentAccountIndex, accountCredits[currentAccountIndex]);
+   	bp.cookies.set("credits" + currentAccountIndex, accountCredits[currentAccountIndex]);
 
    	// update the credit counter display
    	document.getElementById('credits' + currentAccountIndex).innerHTML = (!isNaN(accountCredits[currentAccountIndex]) ? accountCredits[currentAccountIndex] : "<font color=\"red\">???</font>");
@@ -855,18 +855,6 @@ function changeButtonText(newButtonText) {
 
 function revertButtonText() {
 	document.getElementById('runBingPongButton').value = previousButtonText;
-}
-
-function getCookie(cookieName) {
-	return window.localStorage.getItem(cookieName);
-}
-
-function setCookie(cookieName, cookieValue) {
-	window.localStorage.setItem(cookieName, cookieValue);
-}
-
-function deleteCookie(cookieName) {
-	window.localStorage.removeItem(cookieName);
 }
 
 function parseTrendingSearchTerms(callback) {
@@ -1626,7 +1614,7 @@ function updateAccountManagerDisplay() {
 	// document.getElementById('accountManager').innerHTML = "<table class=\"optionsTable\"><tr class=\"optionsTable\"><td class=\"optionsTable\"><select disabled><option>Main account group</option></select><span style=\"float: right\">This group's last run time: <b>N/A</b></span></td><tr class=\"optionsTable\"><td class=\"optionsTable\"><table id=\"accountsTable\"></table></td></tr></table>";
 	document.getElementById('accountManager').innerHTML = "<table class=\"optionsTable\"><tr class=\"optionsTable\"><td class=\"optionsTable\"><!--<select disabled><option>Main account group</option></select><span style=\"float: right\">This group's last run time: <b>N/A</b></span>--></td><tr class=\"optionsTable\"><td class=\"optionsTable\"><table id=\"accountsTable\"></table></td></tr></table>";
 
-	if (getCookie("accountCount") && getCookie("accountCount") !== "0") {
+	if (bp.cookies.get("accountCount") && bp.cookies.get("accountCount") !== "0") {
 		// delete all account data currently stored in the arrays (not in the cookies)
 		accountUsernames.length = 0;
 		accountPasswords.length = 0;
@@ -1645,7 +1633,7 @@ function updateAccountManagerDisplay() {
 		var creditsHeaderCell = headerRow.insertCell(5);
 		var optionsHeaderCell = headerRow.insertCell(6);
 
-		cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\"  " + ((!getCookie("globalCheck") || getCookie("globalCheck") === "true") ? "checked" : "") + " " + (accountsDone ? "disabled" : "") + " onclick=\"onGlobalCheckmarkChange();\"></center>";
+		cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\"  " + ((!bp.cookies.get("globalCheck") || bp.cookies.get("globalCheck") === "true") ? "checked" : "") + " " + (accountsDone ? "disabled" : "") + " onclick=\"onGlobalCheckmarkChange();\"></center>";
 		dsHeaderCell.innerHTML = "<center><i class=\"fa fa-laptop fa-lg\"></i></center>";
 		msHeaderCell.innerHTML = "<center><i class=\"fa fa-mobile fa-lg\"></i></center>";
 		// tqHeaderCell.innerHTML = "<center><i class=\"fa fa-question-circle fa-lg\"></i></center>";
@@ -1654,7 +1642,7 @@ function updateAccountManagerDisplay() {
 		creditsHeaderCell.innerHTML = "<center><b>Credits</b></center>";
 		optionsHeaderCell.innerHTML = "<center><b>Options</b></center>";
 
-		for (var i = 1; i <= getCookie("accountCount"); i++) {
+		for (var i = 1; i <= bp.cookies.get("accountCount"); i++) {
 			// populate the rows
 			var row = accountsTable.insertRow(-1);
 			var checkmarkCell = row.insertCell(0);
@@ -1666,28 +1654,28 @@ function updateAccountManagerDisplay() {
 			var creditsCell = row.insertCell(5);
 			var optionsCell = row.insertCell(6);
 
-			checkmarkCell.innerHTML = "<center><input type=checkbox id=\"check" + i + "\" " + ((!getCookie("check" + i) || getCookie("check" + i) === "true") ? "checked" : "") + " " + (accountsDone ? "disabled" : "") + " onclick=\"onAccountCheckmarksChange();\"></center>";
+			checkmarkCell.innerHTML = "<center><input type=checkbox id=\"check" + i + "\" " + ((!bp.cookies.get("check" + i) || bp.cookies.get("check" + i) === "true") ? "checked" : "") + " " + (accountsDone ? "disabled" : "") + " onclick=\"onAccountCheckmarksChange();\"></center>";
 			dsStatusCell.innerHTML = "<center><span id=\"status" + i + "\"><img src=\"../blue10.png\" width=\"10\" height=\"10\"></img></span></center>";
 			msStatusCell.innerHTML = "<center><span id=\"status_ms" + i + "\"><img src=\"../blue10.png\" width=\"10\" height=\"10\"></img></span></center>";
 			// tqStatusCell.innerHTML = "<center><span id=\"status_tq" + i + "\"><img src=\"../blue10.png\" width=\"10\" height=\"10\"></img></span></center>";;
 			dtStatusCell.innerHTML = "<center><span id=\"status_dt" + i + "\"><img src=\"../blue10.png\" width=\"10\" height=\"10\"></img></span></center>";
-			usernameCell.innerHTML = "<span id=\"accountName" + i + "\">" + getCookie("username" + i) + "</span>&nbsp;&nbsp;&nbsp;";
+			usernameCell.innerHTML = "<span id=\"accountName" + i + "\">" + bp.cookies.get("username" + i) + "</span>&nbsp;&nbsp;&nbsp;";
 			creditsCell.innerHTML = "<center><span id=\"credits" + i + "\"></span></center>";
 			optionsCell.innerHTML = "<a href=\"#\" onclick=\"launchDashboardForAccount(" + i + ");return false;\">Dashboard</a>&nbsp;&nbsp;&nbsp;<a href=\"#\" onclick=\"launchEmailForAccount(" + i + ");return false;\">Outlook</a>&nbsp;&nbsp;&nbsp;<a href=\"#\" onclick=\"removeAccount(" + i + ");return false;\">Remove</a>";
 
 			// fetch the account information from the cookies and store them into the arrays for Bing Pong to use
-			accountUsernames[i] = getCookie("username" + i);
-			accountPasswords[i] = getCookie("password" + i);
-			accountCredits[i] = (getCookie("credits" + i) ? getCookie("credits" + i) : "N/A");
+			accountUsernames[i] = bp.cookies.get("username" + i);
+			accountPasswords[i] = bp.cookies.get("password" + i);
+			accountCredits[i] = (bp.cookies.get("credits" + i) ? bp.cookies.get("credits" + i) : "N/A");
 			document.getElementById('credits' + i).innerHTML = accountCredits[i];
-			accountRedeemStatuses[i] = getCookie("isRedeemable" + i);
+			accountRedeemStatuses[i] = bp.cookies.get("isRedeemable" + i);
 
 			// visually show an accounts redeem status
 			document.getElementById('credits' + i).style.color = ((accountRedeemStatuses[i] === "true") ? "#00FF00" : "#FAFAFA");
 			document.getElementById('accountName' + i).style.color = ((accountRedeemStatuses[i] === "true") ? "#00FF00" : "#FAFAFA");
 
 			// fetch the value of accountCount
-			accountCount = getCookie("accountCount");
+			accountCount = bp.cookies.get("accountCount");
 		}
 
 		// update the "Run Bing Pong" button to show the number of accounts, but only do it if the but is not running
@@ -1723,8 +1711,8 @@ function updateAccountManagerDisplay() {
 					document.getElementById('status_ms' + i).innerHTML = "<i class=\"fa fa-minus\"></i>";
 					// document.getElementById('status_tq' + i).innerHTML = "<i class=\"fa fa-minus\"></i>";
 					document.getElementById('status_dt' + i).innerHTML = "<i class=\"fa fa-minus\"></i>";
-					document.getElementById('accountName' + i).innerHTML = "<strike>" + getCookie("username" + i) + "</strike>";
-					document.getElementById('credits' + i).innerHTML = "<strike>" + (getCookie("credits" + i) ? getCookie("credits" + i) : "N/A") + "</strike>";
+					document.getElementById('accountName' + i).innerHTML = "<strike>" + bp.cookies.get("username" + i) + "</strike>";
+					document.getElementById('credits' + i).innerHTML = "<strike>" + (bp.cookies.get("credits" + i) ? bp.cookies.get("credits" + i) : "N/A") + "</strike>";
 				}
 			}
 		}
@@ -1876,9 +1864,9 @@ function addAccount(username, password, infoNeedsVerification, callbackOnSuccess
 	 			accountPasswords[accountCount] = password;
 
 	 			// store the new username, password, and account count into local storage
-	 			setCookie("username" + accountCount, username);
-	 			setCookie("password" + accountCount, password);
-	 			setCookie("accountCount", accountCount);
+	 			bp.cookies.set("username" + accountCount, username);
+	 			bp.cookies.set("password" + accountCount, password);
+	 			bp.cookies.set("accountCount", accountCount);
 
 	 			// update the account manager display
 	 			updateAccountManagerDisplay();
@@ -1902,9 +1890,9 @@ function addAccount(username, password, infoNeedsVerification, callbackOnSuccess
 	 	accountPasswords[accountCount] = password;
 
 	 	// store the new username, password, and account count into local storage
-	 	setCookie("username" + accountCount, username);
-	 	setCookie("password" + accountCount, password);
-	 	setCookie("accountCount", accountCount);
+	 	bp.cookies.set("username" + accountCount, username);
+	 	bp.cookies.set("password" + accountCount, password);
+	 	bp.cookies.set("accountCount", accountCount);
 
 	 	// update the account manager display
 	 	updateAccountManagerDisplay();
@@ -1916,10 +1904,10 @@ function addAccount(username, password, infoNeedsVerification, callbackOnSuccess
 
 function removeAccount(accountIndex) {
 	// delete the corresponding cookies
-	deleteCookie("username" + accountIndex);
-	deleteCookie("password" + accountIndex);
-	deleteCookie("credits" + accountIndex);
-	deleteCookie("isRedeemable" + accountIndex);
+	bp.cookies.remove("username" + accountIndex);
+	bp.cookies.remove("password" + accountIndex);
+	bp.cookies.remove("credits" + accountIndex);
+	bp.cookies.remove("isRedeemable" + accountIndex);
 
 	// remove account entry #accountIndex from the arrays
 	accountUsernames.splice(accountIndex, 1);
@@ -1929,21 +1917,21 @@ function removeAccount(accountIndex) {
 
 	// update the new account count
 	accountCount--;
-	setCookie("accountCount", accountCount);
+	bp.cookies.set("accountCount", accountCount);
 
 	// shift all accounts > accountIndex down to "fill the gap"
 	for (var i = 1; i <= accountCount; i++) {
-		setCookie("username" + i, accountUsernames[i]);
-		setCookie("password" + i, accountPasswords[i]);
-		setCookie("credits" + i, accountCredits[i]);
-		setCookie("isRedeemable" + i, accountRedeemStatuses[i]);
+		bp.cookies.set("username" + i, accountUsernames[i]);
+		bp.cookies.set("password" + i, accountPasswords[i]);
+		bp.cookies.set("credits" + i, accountCredits[i]);
+		bp.cookies.set("isRedeemable" + i, accountRedeemStatuses[i]);
 	}
 
 	// delete the cookie corresponding to the (accountCount + 1)th account
-	deleteCookie("username" + (accountCount + 1));
-	deleteCookie("password" + (accountCount + 1));
-	deleteCookie("credits" + (accountCount + 1));
-	deleteCookie("isRedeemable" + (accountCount + 1));
+	bp.cookies.remove("username" + (accountCount + 1));
+	bp.cookies.remove("password" + (accountCount + 1));
+	bp.cookies.remove("credits" + (accountCount + 1));
+	bp.cookies.remove("isRedeemable" + (accountCount + 1));
 
 	// update the account manager display
 	updateAccountManagerDisplay();
