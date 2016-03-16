@@ -1,41 +1,43 @@
 bp.helperTools = (function () {
 	var _bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
+	
+	var helperTools = {};
 
-	ht.openDashboardForCaptcha = function (callback) {
+	helperTools.openDashboardForCaptcha = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboardForCaptcha"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.closeDashboardForCaptcha = function (callback) {
+	helperTools.closeDashboardForCaptcha = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "closeDashboardForCaptcha"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.checkForSearchCaptcha = function (callback) {
+	helperTools.checkForSearchCaptcha = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "checkForSearchCaptcha"}, function (response) {
 			try {
 				callback(response.tabIsDead, response.captchaDetected);
 			} catch (e) {
-				setTimeout(function () { checkForSearchCaptcha = function (callback); }, COMMUNICATION_FAILURE_DELAY);
+				helperTools.checkForSearchCaptcha(callback);
 			}
 		});
 	}
 
-	ht.openSearchCaptcha = function (callback) {
+	helperTools.openSearchCaptcha = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "bringSearchCaptchaIntoFocus"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.closeSearchCaptcha = function (callback) {
+	helperTools.closeSearchCaptcha = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "moveSearchCaptchaBack"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.enableMobileMode = function (callback) {
+	helperTools.enableMobileMode = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "enableMobileMode"}, function (response) {
 			callback();
 		});
@@ -47,88 +49,98 @@ bp.helperTools = (function () {
 		});
 	}
 
-	ht.deleteMicrosoftCookies = function (callback) {
+	helperTools.deleteMicrosoftCookies = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "deleteMicrosoftCookies"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.openBPHOptions() {
+	helperTools.openBPHOptions() {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openBPHOptions"}, function (response) {
 			// do nothing
 		});
 	}
 
-	ht.openSearchWindow = function (callback) {
+	helperTools.openSearchWindow = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openSearchWindow"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.closeSearchWindow = function (callback) {
+	helperTools.closeSearchWindow = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "closeSearchWindow"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.getWikiArticles = function (callback) {
+	helperTools.getWikiArticles = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "getWikiArticles"}, function (response) {
 			try {
 				callback(response.queries);
 			} catch (e) {
-				getWikiArticles = function (callback);
+				helperTools.getWikiArticles(callback);
 			}
 		});
 	}
 
-	ht.performGETRequest(ajaxURL, responseIsJSON, callback) {
+	helperTools.performGETRequest(ajaxURL, responseIsJSON, callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "performGETRequest", ajaxURL: ajaxURL, responseIsJSON: responseIsJSON}, function (response) {
 			try {
 				callback(response);
 			} catch (e) {
-				performGETRequest(ajaxURL, responseIsJSON, callback);
+				helperTools.performGETRequest(ajaxURL, responseIsJSON, callback);
 			}
 		});
 	}
 
-	ht.getSearchWindowContents = function (callback) {
+	helperTools.getSearchWindowContents = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "getSearchWindowContents"}, function (response) {
 			try {
 				callback(response.contents);
 			} catch (e) {
-				getSearchWindowContents = function (callback);
+				helperTools.getSearchWindowContents(callback);
 			}
 		});
 	}
 
-	ht.logIntoAccount(username, password, callback) {
+	helperTools.logIntoAccount(username, password, callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logIntoAccount", username: username, password: password}, function (response) {
 			callback();
 		});
 	}
 
-	ht.logoutOfAccount = function (callback) {
+	helperTools.logoutOfAccount = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logoutOfAccount"}, function (response) {
 			callback();
 		});
 
-	ht.openDashboardForVerifying = function (callback) {
+	helperTools.openDashboardForVerifying = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboardForVerifying"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.openDashboard = function (callback) {
+	helperTools.openDashboard = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboard"}, function (response) {
 			callback();
 		});
 	}
 
-	ht.openOutlook = function (callback) {
+	helperTools.openOutlook = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openOutlook"}, function (response) {
 			callback();
 		});
 	}
-
-	return ht;
+	
+	helperTools.checkForLicense = function (callback) { 
+		try {
+			chrome.runtime.sendMessage(_bphExtensionID, {action: "checkForLicense"}, function (response) {
+				callback(response);
+			});
+		} catch (e) { 
+			helperTools.checkForLicense(callback);
+		}
+	}
+	
+	return helperTools;
 })();

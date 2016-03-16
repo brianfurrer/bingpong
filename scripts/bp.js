@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-0 (3/4/2016)
+// Current version: 0.21.1-14 (3/16/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-0";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-14 (BETA)";
 
 // multiple account variables
 var dashboardData;
@@ -57,38 +57,10 @@ var numberOfMobileSearches = 20;
 var stopRunningBingPongFlag = false; // for pausing/stopping
 
 // bing pong helper variables
-var bphExtensionID = "cohnfldcnegepfhhfbcgecblgjdcmcka";
-var bphCanaryExtensionID = "omepikidpeoofklbmlidbbhojdhpggfj";
 var bphInstallURL = "https://chrome.google.com/webstore/detail/" + bphExtensionID;
-var bphCompatibleVersions = ["1.5.0.10", "1.5.0.11", "1.5.1.3", "1.6.0.1"];
-var bphLatestVersion = "1.6.0.1";
+var bphCompatibleVersions = ["1.5.0.10", "1.5.0.11", "1.5.1.3", "1.6.0.1", "1.6.1.75"];
+var bphLatestVersion = "1.6.1.75";
 var bphInstalled = false;
-
-// license
-var bp = {'isLicensed': false, 'licenseIsCached': false};
-
-bp.checkForLicense = function (callback) {
-	chrome.runtime.sendMessage(bphExtensionID, {action: "checkForLicense"}, function (response) {
-		try {
-			bp.isLicensed = response;
-			bp.licenseIsCached = true
-			Object.freeze(bp);
-
-			// remove ads for licensed users
-			setCookie("removeAd", bp.isLicensed);
-
-			if (bp.isLicensed) {
-				try {
-					document.getElementById('ad').style.display = "none";
-				} catch (e) {};
-			}
-
-			callback(response);
-		} catch (e) {
-			bp.checkForLicense(callback);
-		}
-	});
-}
 
 checkBrowserCompatibility(function () {
 	// currently do nothing
@@ -156,7 +128,16 @@ function checkBrowserCompatibility(callback) {
 				}
 
 				if (!bphInstalled || bphCompatibleVersions.indexOf(bphInstalledVersion) != -1) {
-					bp.checkForLicense(function (isLicensed) {
+					bp.licensing.updateLicenseStatus(function (isLicensed) {
+						// remove ads for licensed users
+						setCookie("removeAd", isLicensed);
+						
+						if (isLicensed) {
+							try {
+								document.getElementById('ad').style.display = "none";
+							} catch (e) {};
+						}
+						
 						parseCookieInfo(function () {
 							if (!document.getElementById('runOnPageLoadOption').checked) {
 								enableSettings();
@@ -234,7 +215,7 @@ function parseCookieInfo(callback) {
 			document.getElementById('runInRandomOrderOption').disabled = false;
 			document.getElementById('pauseOnCaptchaOption').disabled = false;
 
-			if (bp.isLicensed || true) {
+			if (bp.licensing.getLicenseStatus() || true) {
 				document.getElementById('waitForIPChangeOption').disabled = false;
 				// document.getElementById('pauseOnCaptchaOption').disabled = false;
 			}
@@ -246,11 +227,11 @@ function parseCookieInfo(callback) {
 			document.getElementById('dashboardTasksOption').checked = true;
 		}
 
-		if (getCookie("pauseOnCaptcha") === "PAUSE_ON_CAPTCHA.ENABLED" && (bp.isLicensed || true)) {
+		if (getCookie("pauseOnCaptcha") === "PAUSE_ON_CAPTCHA.ENABLED" && (bp.licensing.getLicenseStatus() || true)) {
 			document.getElementById('pauseOnCaptchaOption').checked = true;
 		}
 
-		if (getCookie("waitForIPChange") === "WAIT_FOR_IP_CHANGE.ENABLED" && document.getElementById('multipleAccountsOption').checked && (bp.isLicensed || true)) {
+		if (getCookie("waitForIPChange") === "WAIT_FOR_IP_CHANGE.ENABLED" && document.getElementById('multipleAccountsOption').checked && (bp.licensing.getLicenseStatus() || true)) {
 			document.getElementById('waitForIPChangeOption').checked = true;
 			document.getElementById('accountsPerIP').disabled = false;
 		}
@@ -361,7 +342,7 @@ function onSettingsChange() {
 
   		document.getElementById('runInRandomOrderOption').disabled = false;
 
-		if (bp.isLicensed || true) {
+		if (bp.licensing.getLicenseStatus() || true) {
 			document.getElementById('waitForIPChangeOption').disabled = false;
 		}
   	} else {
@@ -401,7 +382,7 @@ function onGlobalCheckmarkChange() {
 	setCookie("globalCheck", document.getElementById('globalCheckmark').checked);
 
 	for (var i = 1; getCookie("check" + i); i++) {
-		if (i > 5 && !bp.isLicensed) {
+		if (i > 5 && !bp.licensing.getLicenseStatus()) {
 			break;
 		}
 
@@ -429,7 +410,7 @@ function onAccountCheckmarksChange() {
 
 	for (var i = 1; getCookie("check" + i); i++) {
 		// only consider the first five accounts when there is no license
-		if (i > 5 && !bp.isLicensed) {
+		if (i > 5 && !bp.licensing.getLicenseStatus()) {
 			break;
 		}
 
@@ -791,7 +772,7 @@ function performThisStep(stepNumber) {
 				};
 
 				if (accountsDone >= 5) { // if 5 or more accounts have completed, check for a license before proceeding
-					if (bp.isLicensed) { // is licensed, so proceed
+					if (bp.licensing.getLicenseStatus()) { // is licensed, so proceed
 						proceed();
 					} else { // not licensed, so finish running Bing Pong
 						finishRunningBingPong();
@@ -1624,7 +1605,7 @@ function enableSettings() {
 		document.getElementById('multipleAccountsOption').disabled = false;
 		document.getElementById('pauseOnCaptchaOption').disabled = false; // for now, captcha detection does not need a license
 
-		if (bp.isLicensed || true) {
+		if (bp.licensing.getLicenseStatus() || true) {
 			// document.getElementById('pauseOnCaptchaOption').disabled = false;
 
 			if (document.getElementById('multipleAccountsOption').checked) {
@@ -1752,7 +1733,7 @@ function updateAccountManagerDisplay() {
 
 		// if there are more than 5 accounts in the list, check for a BPH license
 		if (accountCount > 5) {
-			if (bp.isLicensed) {
+			if (bp.licensing.getLicenseStatus()) {
 				// do nothing for now
 			} else {
 				// update the statuses to reflect that Bing Pong will not run anything below the first 5 accounts
@@ -1781,7 +1762,7 @@ function updateAddAccountSection() {
 		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"manager1\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager2\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager3\" name=\"add1\" onclick=\"changeAddAccountSection()\">Export accounts</form><span id=\"accountAdder\"></span>";
 
 		// show the add account section if there are less than 5 accounts linked or if the user has a license
-		if (accountCount < 5 || bp.isLicensed) {
+		if (accountCount < 5 || bp.licensing.getLicenseStatus()) {
 			document.getElementById('accountAdder').innerHTML = "<b>Add an account:</b><br>E-mail:<input placeholder=\"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Microsoft Live\" id=\"username\" size=30><br>Password:<input type=\"password\" placeholder=\"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password\" id=\"password\" size=25><br><input type=button id=\"addAccountButton\" value=\"Add account\" onclick=\"addAccountInManager()\">";
 		} else { // not qualified to add more accounts (>5 accounts and no license)
 			document.getElementById('accountAdder').innerHTML = "<b>To link another account to Bing Pong, you must either remove an already linked account or purchase a Bing Pong Helper license.<br>You may purchase a license from the Bing Pong Helper options page.</b>";
@@ -1790,7 +1771,7 @@ function updateAddAccountSection() {
 		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"manager1\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager2\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager3\" name=\"add1\" onclick=\"changeAddAccountSection()\">Export accounts</form><span id=\"accountAdder\"></span>";
 
 		// check for a license, and only show the account adding section if licensed
-		if (bp.isLicensed) {
+		if (bp.licensing.getLicenseStatus()) {
 			document.getElementById('accountAdder').innerHTML = "<b>Add accounts in bulk:</b><br><i>Add each account's information in the format <b>username:password</b> and enter one account per line.<br>(<b>NOTE: The account credentials you supply will not be verified. Make sure they are correct.</b>)</i><br><textarea id=\"bulkField\" rows=8 cols=65></textarea><br><input type=button id=\"bulk_button\" value=\"Add accounts\" onClick=\"addAccountsInBulk()\">";
 		} else {
 			document.getElementById('accountAdder').innerHTML = "<b>Adding accounts in bulk requires a Bing Pong Helper license.<br>You may purchase a license from the Bing Pong Helper options page.</b>";
