@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-17 (3/16/2016)
+// Current version: 0.21.1-18 (3/16/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -14,7 +14,7 @@ var GOOD_LOGIN_MESSAGE_TIMEOUT = 4000;
 var COMMUNICATION_FAILURE_DELAY = 500;
 var CAPTCHA_MESSAGE_TIMEOUT = 1;
 var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
-var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-17 (BETA)";
+var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-18 (BETA)";
 
 // multiple account variables
 var dashboardData;
@@ -77,7 +77,7 @@ function checkBrowserCompatibility(callback) {
 		// if BPH is not installed, this will be an install button
 		document.getElementById('bphOptionsButton').disabled = false;
 
-		// check for BPH (both stable and canary)
+		// check for BPH
 		bp.helperTools.updateHelperInstallationStatus(function (bphIsInstalled) { 
 			if (bphIsInstalled) { 
 				var installedHelperVersion = bp.helperTools.getInstalledHelperVersion();
@@ -118,9 +118,9 @@ function checkBrowserCompatibility(callback) {
 						} catch (e) {};
 					}
 					
-					parseCookieInfo(function () {
+					bp.settings.init(function () {
 						if (!document.getElementById('runOnPageLoadOption').checked) {
-							enableSettings();
+							bp.settings.enable();
 							changeStatusText(DEFAULT_STATUS_TEXT, "DO_NOT_CHANGE", "DO_NOT_CHANGE");
 						}
 
@@ -130,111 +130,11 @@ function checkBrowserCompatibility(callback) {
 			}
 		});
 	} else {
-		parseCookieInfo(function () {
-			enableSettings();
+		bp.settings.init(function () {
+			bp.settings.enable();
 			changeStatusText(DEFAULT_STATUS_TEXT, "DO_NOT_CHANGE", "DO_NOT_CHANGE");
 			callback();
 		});
-	}
-}
-
-function parseCookieInfo(callback) {
-	// delete the bad "auto" cookies
-	if (bp.cookies.get("numberOfDesktopSearches")) {
-		if (isNaN(bp.cookies.get("numberOfDesktopSearches"))) {
-			bp.cookies.remove("numberOfDesktopSearches");
-		} else {
-			document.getElementById('numberOfDesktopSearches').value = bp.cookies.get("numberOfDesktopSearches");
-			numberOfDesktopSearches = bp.cookies.get("numberOfDesktopSearches");
-			document.getElementById('runBingPongButton').value = "Run Bing Pong (" + numberOfDesktopSearches + " searches)";
-		}
-	}
-
-	if (bp.cookies.get("numberOfMobileSearches")) {
-		// delete the bad "auto" cookies
-		if (isNaN(bp.cookies.get("numberOfMobileSearches"))) {
-			bp.cookies.remove("numberOfMobileSearches");
-		} else { // good cookie
-			document.getElementById('numberOfMobileSearches').value = bp.cookies.get("numberOfMobileSearches");
-			numberOfMobileSearches = bp.cookies.get("numberOfMobileSearches");
-		}
-	}
-
-	if (bp.helperTools.getHelperInstallionStatus()) {
-		enterAutoInSearchBoxes();
-		disableSearchOptions();
-	} else {
-		enableSearchOptions();
-		disableMobileSearchOption();
-	}
-
-	if (bp.cookies.get("useSearchDelay") === "SEARCH_DELAY.ENABLED") {
-		document.getElementById('useSearchDelayOption').checked = true;
-		document.getElementById('minSearchDelayTime').disabled = false;
-		document.getElementById('maxSearchDelayTime').disabled = false;
-	}
-
-	if (bp.cookies.get("minSearchDelayTime")) {
-		minSearchDelayTime = bp.cookies.get("minSearchDelayTime");
-		document.getElementById('minSearchDelayTime').value = minSearchDelayTime;
-	}
-
-	if (bp.cookies.get("maxSearchDelayTime")) {
-		maxSearchDelayTime = bp.cookies.get("maxSearchDelayTime");
-		document.getElementById('maxSearchDelayTime').value = maxSearchDelayTime;
-	}
-
-	if (bp.cookies.get("accountsPerIP") >= 0) {
-		document.getElementById('accountsPerIP').selectedIndex = bp.cookies.get("accountsPerIP");
-	}
-
-	if (bp.helperTools.getHelperInstallionStatus()) {
-		if (bp.cookies.get("useMultipleAccounts") === "MULTIPLE_ACCOUNTS.ENABLED") {
-			document.getElementById('multipleAccountsOption').checked = true;
-			document.getElementById('runInRandomOrderOption').disabled = false;
-			document.getElementById('pauseOnCaptchaOption').disabled = false;
-
-			if (bp.licensing.getLicenseStatus() || true) {
-				document.getElementById('waitForIPChangeOption').disabled = false;
-				// document.getElementById('pauseOnCaptchaOption').disabled = false;
-			}
-
-			updateAccountManagerDisplay();
-		}
-
-		if (bp.cookies.get("doDashboardTasks") === "DASHBOARD_TASKS.ENABLED") {
-			document.getElementById('dashboardTasksOption').checked = true;
-		}
-
-		if (bp.cookies.get("pauseOnCaptcha") === "PAUSE_ON_CAPTCHA.ENABLED" && (bp.licensing.getLicenseStatus() || true)) {
-			document.getElementById('pauseOnCaptchaOption').checked = true;
-		}
-
-		if (bp.cookies.get("waitForIPChange") === "WAIT_FOR_IP_CHANGE.ENABLED" && document.getElementById('multipleAccountsOption').checked && (bp.licensing.getLicenseStatus() || true)) {
-			document.getElementById('waitForIPChangeOption').checked = true;
-			document.getElementById('accountsPerIP').disabled = false;
-		}
-
-		if (bp.cookies.get("runInRandomOrder") === "RUN_IN_RANDOM_ORDER.ENABLED" && document.getElementById('multipleAccountsOption').checked) {
-			document.getElementById('runInRandomOrderOption').checked = true;
-		}
-
-		if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
-			document.getElementById('runOnPageLoadOption').checked = true;
-		}
-
-		if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED" || location.href.indexOf("?runonpageload=1") != -1) {
-			setTimeout(runBingPong, 1000);
-		}
-
-		callback();
-	} else {
-		if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
-			document.getElementById('runOnPageLoadOption').checked = true;
-			runBingPong();
-		}
-
-		callback();
 	}
 }
 
@@ -250,111 +150,6 @@ function changeStatusText(statusText, remainingText, extraText) {
 	if (extraText !== "DO_NOT_CHANGE") {
 		document.getElementById('extra').innerHTML = extraText;
 	}
-}
-
-function saveSettings() {
-   	bp.cookies.set("useMultipleAccounts", (document.getElementById('multipleAccountsOption').checked ? "MULTIPLE_ACCOUNTS.ENABLED" : "MULTIPLE_ACCOUNTS.DISABLED"));
-   	bp.cookies.set("doDashboardTasks", (document.getElementById('dashboardTasksOption').checked ? "DASHBOARD_TASKS.ENABLED" : "DASHBOARD_TASKS.DISABLED"));
-   	bp.cookies.set("pauseOnCaptcha", (document.getElementById('pauseOnCaptchaOption').checked ? "PAUSE_ON_CAPTCHA.ENABLED" : "PAUSE_ON_CAPTCHA.DISABLED"));
-   	bp.cookies.set("useSearchDelay", (document.getElementById('useSearchDelayOption').checked ? "SEARCH_DELAY.ENABLED" : "SEARCH_DELAY.DISABLED"));
-   	bp.cookies.set("runOnPageLoad", (document.getElementById('runOnPageLoadOption').checked ? "RUN_ON_PAGE_LOAD.ENABLED" : "RUN_ON_PAGE_LOAD.DISABLED"));
-   	bp.cookies.set("waitForIPChange", (document.getElementById('waitForIPChangeOption').checked ? "WAIT_FOR_IP_CHANGE.ENABLED" : "WAIT_FOR_IP_CHANGE.DISABLED"));
-	bp.cookies.set("accountsPerIP", document.getElementById('accountsPerIP').selectedIndex);
-	bp.cookies.set("runInRandomOrder", (document.getElementById('runInRandomOrderOption').checked ? "RUN_IN_RANDOM_ORDER.ENABLED" : "RUN_IN_RANDOM_ORDER.DISABLED"));
-
-	// do not save invalid input
-	if (parseFloat(document.getElementById('minSearchDelayTime').value) != NaN &&
-		parseFloat(document.getElementById('maxSearchDelayTime').value) != NaN &&
-		parseFloat(document.getElementById('minSearchDelayTime').value) < parseFloat(document.getElementById('maxSearchDelayTime').value)) {
-		bp.cookies.set("minSearchDelayTime", document.getElementById('minSearchDelayTime').value);
-		bp.cookies.set("maxSearchDelayTime", document.getElementById('maxSearchDelayTime').value);
-   	}
-
-   	if (!isNaN(document.getElementById('numberOfDesktopSearches').value)) {
-		bp.cookies.set("numberOfDesktopSearches", document.getElementById('numberOfDesktopSearches').value);
-   	}
-
-	if (!isNaN(document.getElementById('numberOfMobileSearches').value)) {
-		bp.cookies.set("numberOfMobileSearches", document.getElementById('numberOfMobileSearches').value);
-   	}
-
-	// clear the "settings have been changed..." timer
-	clearStatusTimeout();
-
-	changeStatusText("Settings have been saved.", "&nbsp;", "&nbsp;");
-   	statusTimeout = setTimeout(function () {
-   		changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
-   		clearStatusTimeout();
-   	}, 5000);
-}
-
-function onSettingsChange() {
-	// clear any status timeout
-	clearStatusTimeout();
-
-	// check for invalid input in the min/max wait time and number of searches boxes, and disable the "Run Bing Pong" button if errors are found
-	if (isNaN(parseFloat(document.getElementById('minSearchDelayTime').value)) ||
-	isNaN(parseFloat(document.getElementById('maxSearchDelayTime').value)) ||
-	(isNaN(parseFloat(document.getElementById('numberOfDesktopSearches').value)) && !bp.helperTools.getHelperInstallionStatus()) ||
-	(parseFloat(document.getElementById('minSearchDelayTime').value) > parseFloat(document.getElementById('maxSearchDelayTime').value)) ||
-	document.getElementById('minSearchDelayTime').value == "" ||
-	document.getElementById('maxSearchDelayTime').value == "") {
-		document.getElementById('runBingPongButton').disabled = true;
-   	} else {
-		document.getElementById('runBingPongButton').disabled = false;
-		minSearchDelayTime = document.getElementById('minSearchDelayTime').value;
-		maxSearchDelayTime = document.getElementById('maxSearchDelayTime').value;
-		numberOfDesktopSearches = document.getElementById('numberOfDesktopSearches').value;
-		numberOfMobileSearches = document.getElementById('numberOfMobileSearches').value;
-   	}
-
-	if (document.getElementById('useSearchDelayOption').checked) {
-		document.getElementById('minSearchDelayTime').disabled = false;
-		document.getElementById('maxSearchDelayTime').disabled = false;
-   	} else {
-		document.getElementById('minSearchDelayTime').disabled = true;
-		document.getElementById('maxSearchDelayTime').disabled = true;
-  	}
-
-  	if (document.getElementById('multipleAccountsOption').checked) {
-  		updateAccountManagerDisplay();
-
-  		document.getElementById('runInRandomOrderOption').disabled = false;
-
-		if (bp.licensing.getLicenseStatus() || true) {
-			document.getElementById('waitForIPChangeOption').disabled = false;
-		}
-  	} else {
-  		hideAccountManagerDisplay();
-		document.getElementById('waitForIPChangeOption').disabled = true;
-		document.getElementById('waitForIPChangeOption').checked = false;
-		document.getElementById('accountsPerIP').disabled = true;
-		document.getElementById('runInRandomOrderOption').disabled = true;
-		document.getElementById('runInRandomOrderOption').checked = false;
-  		document.getElementById('runBingPongButton').value = "Run Bing Pong (" + numberOfDesktopSearches + " searches)";
-  	}
-
-  	if (document.getElementById('waitForIPChangeOption').checked) {
-  		document.getElementById('accountsPerIP').disabled = false;
-  	} else {
-  		document.getElementById('accountsPerIP').disabled = true;
-  	}
-
-	// update the display with a timer to save settings
-	var tempSeconds = SAVE_SETTINGS_TIMEOUT;
-	changeStatusText("Settings have been changed.", "Click <a href=\"javascript:void(0)\" onclick=\"saveSettings();\">HERE</a> to save them for future visits.", "This message will disappear in " + tempSeconds + " seconds.");
-
-	statusTimeout = setInterval(function () {
-		tempSeconds--;
-		if (tempSeconds > 1) {
-			changeStatusText("DO_NOT_CHANGE", "DO_NOT_CHANGE", "This message will disappear in " + tempSeconds + " seconds.");
-		} else if (tempSeconds == 1) {
-			changeStatusText("DO_NOT_CHANGE", "DO_NOT_CHANGE", "This message will disappear in 1 second.");
-		} else {
-			changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
-			clearStatusTimeout();
-		}
-	}, 1000);
 }
 
 function onGlobalCheckmarkChange() {
@@ -805,7 +600,7 @@ function runBingPong() {
 function finishRunningBingPong() {
 	accountsDone = 0;
 
-	enableSettings();
+	bp.settings.enable();
 
 	if (bp.helperTools.getHelperInstallionStatus()) {
 		if (location.href.indexOf("?runonpageload=1") != -1) {
@@ -1543,68 +1338,6 @@ function restoreSearchBoxes() {
 	// stub
 }
 
-function enableSettings() {
-	document.getElementById('runBingPongButton').disabled = false;
-	document.getElementById('useSearchDelayOption').disabled = false;
-	document.getElementById('runOnPageLoadOption').disabled = false;
-
-	if (document.getElementById('useSearchDelayOption').checked) {
-		document.getElementById('minSearchDelayTime').disabled = false;
-		document.getElementById('minSearchDelayTime').disabled = false;
-	}
-
-	// enable the account checkboxes
-	if (document.getElementById('multipleAccountsOption').checked) {
-		document.getElementById('runInRandomOrderOption').disabled = false;
-
-		if (accountCount) {
-			document.getElementById('globalCheckmark').disabled = false;
-
-			for (var i = 1; i <= accountCount; i++) {
-				document.getElementById('check' + i).disabled = false;
-			}
-		}
-	}
-
-	if (bp.helperTools.getHelperInstallionStatus()) {
-		// enable dashboard tasks and multiple accounts, since they do not need a license
-		document.getElementById('dashboardTasksOption').disabled = false;
-		document.getElementById('multipleAccountsOption').disabled = false;
-		document.getElementById('pauseOnCaptchaOption').disabled = false; // for now, captcha detection does not need a license
-
-		if (bp.licensing.getLicenseStatus() || true) {
-			// document.getElementById('pauseOnCaptchaOption').disabled = false;
-
-			if (document.getElementById('multipleAccountsOption').checked) {
-				document.getElementById('waitForIPChangeOption').disabled = false;
-			}
-
-			if (document.getElementById('waitForIPChangeOption').checked) {
-				document.getElementById('accountsPerIP').disabled = false;
-			}
-		}
-	}
-}
-
-function disableSettings(alsoDisableRunButton) {
-	if (alsoDisableRunButton) {
-		document.getElementById('runBingPongButton').disabled = true;
-	}
-
-	document.getElementById('numberOfDesktopSearches').disabled = true;
-	document.getElementById('numberOfMobileSearches').disabled = true;
-	document.getElementById('useSearchDelayOption').disabled = true;
-	document.getElementById('runOnPageLoadOption').disabled = true;
-	document.getElementById('minSearchDelayTime').disabled = true;
-	document.getElementById('maxSearchDelayTime').disabled = true;
-	document.getElementById('multipleAccountsOption').disabled = true;
-	document.getElementById('dashboardTasksOption').disabled = true;
-	document.getElementById('pauseOnCaptchaOption').disabled = true;
-	document.getElementById('waitForIPChangeOption').disabled = true;
-	document.getElementById('accountsPerIP').disabled = true;
-	document.getElementById('runInRandomOrderOption').disabled = true;
-}
-
 function hideAccountManagerDisplay() {
 	document.getElementById('accountManager').innerHTML = "";
 }
@@ -1772,7 +1505,7 @@ function addAccountInManager() {
 	changeStatusText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Verifying account credentials...", "&nbsp;", "&nbsp;");
 
 	addAccount(document.getElementById('username').value, document.getElementById('password').value, true, function () { // successful add
-		enableSettings();
+		bp.settings.enable();
 		document.getElementById('username').disabled = false;
 		document.getElementById('password').disabled = false;
 		document.getElementById('addAccountButton').disabled = false;
@@ -1782,7 +1515,7 @@ function addAccountInManager() {
 			changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
 		}, GOOD_LOGIN_MESSAGE_TIMEOUT);
 	}, function () { // bad login info
-		enableSettings();
+		bp.settings.enable();
 		document.getElementById('username').disabled = false;
 		document.getElementById('password').disabled = false;
 		document.getElementById('addAccountButton').disabled = false;
@@ -1802,7 +1535,7 @@ function addAccountInManager() {
 			}
 		}, 1000);
 	}, function () { // logout problems
-		enableSettings();
+		bp.settings.enable();
 		document.getElementById('username').disabled = false;
 		document.getElementById('password').disabled = false;
 		document.getElementById('addAccountButton').disabled = false;
