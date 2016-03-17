@@ -48,7 +48,7 @@ bp.status = (function () {
 				status.reset();
 				callback();
 			}
-		});
+		}, 1000);
 	}
 	
 	status.changeTextWithDefaultTimeout = function (statusText, remainingText, extraText, timeInSeconds) { 
