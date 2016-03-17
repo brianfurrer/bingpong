@@ -1,8 +1,7 @@
 bp.status = (function () { 
-	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-22 (BETA)";
+	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-24 (BETA)";
 	
-	var _statusTimeout;
-	var _secondsLeft;
+	var _statusTimer;
 	
 	var status = {};
 	
@@ -21,38 +20,35 @@ bp.status = (function () {
 	}
 	
 	status.changeWithTimeout = function (statusText, remainingText, extraText, timeInSeconds, callback) {
-		_secondsLeft = timeInSeconds;
+		var secondsLeft = timeInSeconds;
+		var updateText;
 		
-		// replace any instance of "%d" with the number of seconds remaining
-		status.change(statusText.replace("%d", _secondsLeft), remainingText.replace("%d", _secondsLeft), extraText.replace("%d", _secondsLeft));
-	
-		_statusTimeout = setInterval(function () { 
+		(updateText = function () { 
 			var tempStatusText, tempRemainingText, tempExtraText;
-			
-			_secondsLeft--;
-			
-			if (_secondsLeft > 1) { // 2 or more seconds remain
+		
+			if (secondsLeft > 1) { // 2 or more seconds remain
 				// so replace "%d second(s)" with "x seconds"
-				tempStatusText = statusText.replace("(s)", "s").replace("%d", _secondsLeft);
-				tempRemainingText = remainingText.replace("(s)", "s").replace("%d", _secondsLeft);
-				tempExtraText = extraText.replace("(s)", "s").replace("%d", _secondsLeft);
+				tempStatusText = statusText.replace("(s)", "s").replace("%d", secondsLeft);
+				tempRemainingText = remainingText.replace("(s)", "s").replace("%d", secondsLeft);
+				tempExtraText = extraText.replace("(s)", "s").replace("%d", secondsLeft);
 				status.change(tempStatusText, tempRemainingText, tempExtraText);
-			} else if (_secondsLeft === 1) { // 1 seconds remains
+			} else if (secondsLeft === 1) { // 1 seconds remains
 				// so replace "%d second(s)" with "1 second"
-				tempStatusText = statusText.replace("(s)", "").replace("%d", _secondsLeft);
-				tempRemainingText = remainingText.replace("(s)", "").replace("%d", _secondsLeft);
-				tempExtraText = extraText.replace("(s)", "").replace("%d", _secondsLeft);
+				tempStatusText = statusText.replace("(s)", "").replace("%d", secondsLeft);
+				tempRemainingText = remainingText.replace("(s)", "").replace("%d", secondsLeft);
+				tempExtraText = extraText.replace("(s)", "").replace("%d", secondsLeft);
 				status.change(tempStatusText, tempRemainingText, tempExtraText);
 			} else { // timer expired
 				status.clearTimer();
 				status.reset();
 				callback();
 			}
+		})();
+		
+		_statusTimer = setInterval(function () { 
+			secondsLeft--;
+			updateText();
 		}, 1000);
-	}
-	
-	status.changeTextWithDefaultTimeout = function (statusText, remainingText, extraText, timeInSeconds) { 
-		status.changeWithTimeout(statusText, remainingText, extraText, timeInSeconds, status.reset);
 	}
 	
 	status.reset = function () { 
@@ -60,7 +56,7 @@ bp.status = (function () {
 	}
 	
 	status.clearTimer = function () { 
-		clearInterval(_statusTimeout);
+		clearInterval(_statusTimer);
 	}
 	
 	return status;
