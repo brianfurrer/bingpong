@@ -23,11 +23,26 @@ bp.Account = function (user, pass) {
 		return _creditCount;
 	}
 	
+	a.setCreditCount = function (creditCount) { 
+		_creditCount = creditCount;
+	}
+	
+	a.setRedeemabilityStatus = function (isRedeemable) { 
+		_isRedeemable = isRedeemable;
+	}
+	
 	a.getRedeemabilityStatus = function () { 
 		return _isRedeemable;
 	}
 
+	// public version
 	a.logIn = function (callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
+		_loginAttemptCount = 0;
+		_logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
+	}
+	
+	// private version
+	function _logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
 		_loginAttemptCount++;
 
 		if (_loginAttemptCount <= MAX_NUMBER_OF_LOGIN_ATTEMPTS) {
@@ -43,7 +58,14 @@ bp.Account = function (user, pass) {
 		}
 	}
 
+	// public version
 	a.logOut = function (callbackOnSuccess, callbackOnFailure) {
+		_logoutAttemptCount = 0;
+		_logOut(callbackOnSuccess, callbackOnFailure);
+	}
+	
+	// private version
+	function _logOut(callbackOnSuccess, callbackOnFailure) {
 		_logoutAttemptCount++;
 
 		if (_logoutAttemptCount <= MAX_NUMBER_OF_LOGOUT_ATTEMPTS) {
@@ -54,7 +76,7 @@ bp.Account = function (user, pass) {
 			_logoutAttemptCount = 0;
 			callbackOnFailure();
 		}
-	}
+	}		
 
 	function _checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
 		bp.rewardsDashboard.updateDashboardData(function () {
@@ -64,25 +86,20 @@ bp.Account = function (user, pass) {
 				// check to see if the account is just blocked
 				bp.helperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
 					if (contents.indexOf("/proofs/Verify") != -1 || contents.indexOf("/ar/cancel") != -1 || contents.indexOf("tou/accrue") != -1) { // we are actually logged in, but the account is blocked
-						_loginAttemptCount = 0;
 						callbackOnBlocked();
 					} else { // we are truly logged out, so make another log-in attempt
-						logOut(function () { // make another log out attempt just to be sure
-							logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
+						_logOut(function () { // make another log out attempt just to be sure
+							_logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
 						}, callbackOnFailure);
 					}
 				});
 			} else if (dashboardData.indexOf("/proofs/Verify") != -1 || dashboardData.indexOf("/ar/cancel") != -1 || dashboardData.indexOf("tou/accrue") != -1) { // account is blocked
-				_loginAttemptCount = 0;
 				callbackOnBlocked();
 			} else if (dashboardData.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
-				_loginAttemptCount = 0;
 				callbackOnBanned();
 			} else if (dashboardData.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
-				_loginAttemptCount = 0;
 				callbackOnCaptcha();
 			} else { // all good, so continue
-				_loginAttemptCount = 0;
 				callbackOnSuccess();
 			}
 		});
@@ -93,10 +110,9 @@ bp.Account = function (user, pass) {
 			// (note: a minimum of 2 logout attempts is currently enforced to improve logout rate --- this probably is not necessary, but we will try it)
 			if (contents.indexOf("Microsoft account requires JavaScript to sign in.") != -1 && _logoutAttemptCount >= 2) { // logged out
 				// return to caller, which will proceed with logging into the account
-				_logoutAttemptCount = 0;
 				callbackOnSuccess();
 			} else { // not logged out, so attempt another logout
-				logOut(callbackOnSuccess, callbackOnFailure);
+				_logOut(callbackOnSuccess, callbackOnFailure);
 			}
 		});
 	}
@@ -106,8 +122,8 @@ bp.Account = function (user, pass) {
 		bp.status.clearDefaultTimeout();
 		bp.status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
 
-		logOut(function () {
-			logIn(function () { // log-in was successful, so open the dashboard
+		_logOut(function () {
+			_logIn(function () { // log-in was successful, so open the dashboard
 				bp.helperTools.openDashboard(function () {
 					bp.settings.enable();
 					bp.status.changeText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
@@ -148,8 +164,8 @@ bp.Account = function (user, pass) {
 		bp.status.clearDefaultTimeout();
 		bp.status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
 
-		logOut(function () {
-			logIn(function () { // log-in was successful, so open the dashboard
+		_logOut(function () {
+			_logIn(function () { // log-in was successful, so open the dashboard
 				bp.helperTools.openDashboard(function () {
 					bp.settings.enable();
 					bp.status.changeText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
