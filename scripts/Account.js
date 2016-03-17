@@ -13,30 +13,30 @@ bp.Account = function (user, pass) {
 	var _loginAttemptCount = 0;
 	var _logoutAttemptCount = 0;
 	
-	var a = {};
+	var account = {};
 	
-	a.getUsername = function () { 
+	account.getUsername = function () { 
 		return _username;
 	}
 	
-	a.getCreditCount = function () { 
+	account.getCreditCount = function () { 
 		return _creditCount;
 	}
 	
-	a.setCreditCount = function (creditCount) { 
+	account.setCreditCount = function (creditCount) { 
 		_creditCount = creditCount;
 	}
 	
-	a.setRedeemabilityStatus = function (isRedeemable) { 
+	account.setRedeemabilityStatus = function (isRedeemable) { 
 		_isRedeemable = isRedeemable;
 	}
 	
-	a.getRedeemabilityStatus = function () { 
+	account.getRedeemabilityStatus = function () { 
 		return _isRedeemable;
 	}
 
 	// public version
-	a.logIn = function (callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
+	account.logIn = function (callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
 		_loginAttemptCount = 0;
 		_logIn(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha);
 	}
@@ -59,7 +59,7 @@ bp.Account = function (user, pass) {
 	}
 
 	// public version
-	a.logOut = function (callbackOnSuccess, callbackOnFailure) {
+	account.logOut = function (callbackOnSuccess, callbackOnFailure) {
 		_logoutAttemptCount = 0;
 		_logOut(callbackOnSuccess, callbackOnFailure);
 	}
@@ -82,7 +82,7 @@ bp.Account = function (user, pass) {
 		bp.rewardsDashboard.updateDashboardData(function () {
 			var dashboardData = bp.rewardsDashboard.getDashboardData();
 
-			if (dashboardData.indexOf("To see your order history, sign in.") != -1 || dashboardData.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
+			if (dashboardDataccount.indexOf("To see your order history, sign in.") != -1 || dashboardDataccount.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
 				// check to see if the account is just blocked
 				bp.helperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
 					if (contents.indexOf("/proofs/Verify") != -1 || contents.indexOf("/ar/cancel") != -1 || contents.indexOf("tou/accrue") != -1) { // we are actually logged in, but the account is blocked
@@ -93,11 +93,11 @@ bp.Account = function (user, pass) {
 						}, callbackOnFailure);
 					}
 				});
-			} else if (dashboardData.indexOf("/proofs/Verify") != -1 || dashboardData.indexOf("/ar/cancel") != -1 || dashboardData.indexOf("tou/accrue") != -1) { // account is blocked
+			} else if (dashboardDataccount.indexOf("/proofs/Verify") != -1 || dashboardDataccount.indexOf("/ar/cancel") != -1 || dashboardDataccount.indexOf("tou/accrue") != -1) { // account is blocked
 				callbackOnBlocked();
-			} else if (dashboardData.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
+			} else if (dashboardDataccount.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
 				callbackOnBanned();
-			} else if (dashboardData.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
+			} else if (dashboardDataccount.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
 				callbackOnCaptcha();
 			} else { // all good, so continue
 				callbackOnSuccess();
@@ -117,7 +117,7 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	a.launchDashboard = function () {
+	account.launchDashboard = function () {
 		bp.settings.disable();
 		bp.status.clearDefaultTimeout();
 		bp.status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
@@ -159,7 +159,7 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	a.launchEmail = function () {
+	account.launchEmail = function () {
 		bp.settings.disable();
 		bp.status.clearDefaultTimeout();
 		bp.status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
@@ -201,7 +201,7 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	a.launchCaptcha = function () {
+	account.launchCaptcha = function () {
 		// to-do
 	}
 	
