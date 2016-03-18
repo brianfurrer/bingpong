@@ -3,6 +3,9 @@ bp.accountManager = (function () {
 	var NOT_REDEEMABLE_COLOR = "#FAFAFA";
 	var BLOCKED_COLOR = "#FFFF00";
 	var BANNED_COLOR = "#FF0000";
+	var RUNNING_INDICATOR = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
+	var WARNING_INDICATOR = "<i class=\"fa fa-exclamation-triangle\"></i>";
+	var BLANK_STATUS = "<img src=\"/blue10.png\" width=\"10\" height=\"10\"></img>";
 	
 	var _accounts = [];
 	var _accountsChecked = [];
@@ -97,12 +100,14 @@ bp.accountManager = (function () {
 				var optionsCell = row.insertCell(6);
 
 				checkmarkCell.innerHTML = "<center><input type=checkbox id=\"check" + i + "\" " + (isEnabled ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"onAccountCheckmarksChange();\"></center>";
-				dsStatusCell.innerHTML = "<center><span id=\"status" + i + "\"><img src=\"../blue10.png\" width=\"10\" height=\"10\"></img></span></center>";
-				msStatusCell.innerHTML = "<center><span id=\"status_ms" + i + "\"><img src=\"../blue10.png\" width=\"10\" height=\"10\"></img></span></center>";
-				dtStatusCell.innerHTML = "<center><span id=\"status_dt" + i + "\"><img src=\"../blue10.png\" width=\"10\" height=\"10\"></img></span></center>";
+				dsStatusCell.innerHTML = "<center><span id=\"status" + i + "\">" + BLANK_STATUS + "</span></center>";
+				msStatusCell.innerHTML = "<center><span id=\"status_ms" + i + "\">" + BLANK_STATUS + "</span></center>";
+				dtStatusCell.innerHTML = "<center><span id=\"status_dt" + i + "\">" + BLANK_STATUS + "</span></center>";
 				usernameCell.innerHTML = "<span id=\"accountName" + i + "\">" + username + "</span>&nbsp;&nbsp;&nbsp;";
 				creditsCell.innerHTML = "<center><span id=\"credits" + i + "\">" + creditCount + "</span></center>";
-				optionsCell.innerHTML = "<a href=\"#\" onclick=\"launchDashboardForAccount(" + i + ");return false;\">Dashboard</a>&nbsp;&nbsp;&nbsp;<a href=\"#\" onclick=\"launchEmailForAccount(" + i + ");return false;\">Outlook</a>&nbsp;&nbsp;&nbsp;<a href=\"#\" onclick=\"removeAccount(" + i + ");return false;\">Remove</a>";
+				optionsCell.innerHTML = "<a href=\"#\" onclick=\"bp.accountManager.launchDashboardForAccountAtIndex(" + i + ");return false;\">Dashboard</a>&nbsp;&nbsp;&nbsp;"
+				optionsCell.innerHTML += "<a href=\"#\" onclick=\"bp.accountManager.launchEmailForAccountAtIndex(" + i + ");return false;\">Outlook</a>&nbsp;&nbsp;&nbsp;";
+				optionsCell.innerHTML += "<a href=\"#\" onclick=\"bp.accountManager.removeAccountAtIndex(" + i + ");return false;\">Remove</a>";
 			}
 		}
 	}
@@ -122,8 +127,11 @@ bp.accountManager = (function () {
 	}
 	
 	accountManager.removeAccount = function (account) {
+		var accountIndex = _getAccountIndex(account);
+		var oldAccountCount = _accounts.length;
+		
 		// remove account from list
-		_accounts.splice(_getAccountIndex(account), 1);
+		_accounts.splice(accountIndex, 1);
 		
 		// delete the corresponding cookies
 		bp.cookies.remove("username" + accountIndex);
@@ -131,27 +139,39 @@ bp.accountManager = (function () {
 		bp.cookies.remove("credits" + accountIndex);
 		bp.cookies.remove("isRedeemable" + accountIndex);
 
-		// remove account entry #accountIndex from the arrays
-		_accounts.splice(_getAccountIndex(account), 1);
+		// remove the account from the list
+		_accounts.splice(accountIndex, 1);
 
 		// update the new account count
 		bp.cookies.set("accountCount", _accounts.length);
 
-		// shift all accounts > accountIndex down to "fill the gap"
-		for (var i = 1; i <= accountCount; i++) {
-			bp.cookies.set("username" + i, _account[i].getUsername());
-			bp.cookies.set("password" + i, _account[i].getPassword());
-			bp.cookies.set("credits" + i, _account[i].getCreditCount());
+		// re-initialize the cookies with the new account data
+		for (var i = 0, l = _accounts.length; i < l; i++) {
+			bp.cookies.set("username" + (i + 1), _account[i].getUsername());
+			bp.cookies.set("password" + (i + 1), _account[i].getPassword());
+			bp.cookies.set("credits" + (i + 1), _account[i].getCreditCount());
 		}
 
-		// delete the cookie corresponding to the (accountCount + 1)th account
-		bp.cookies.remove("username" + (_accounts.length + 1));
-		bp.cookies.remove("password" + (_accounts.length + 1));
-		bp.cookies.remove("credits" + (_accounts.length + 1));
-		bp.cookies.remove("isRedeemable" + (_accounts.length + 1));
+		// delete the cookie corresponding to the old account
+		bp.cookies.remove("username" + oldAccountCount);
+		bp.cookies.remove("password" + oldAccountCount);
+		bp.cookies.remove("credits" + oldAccountCount);
+		bp.cookies.remove("isRedeemable" + oldAccountCount);
 
 		// update the account manager display
 		accountManager.updateDisplay(false);
+	}
+	
+	accountManager.removeAccountAtIndex = function (index) { 
+		accountManger.removeAccount(_getAccountAtIndex(index));
+	}
+	
+	accountManager.launchDashboardForAccountAtIndex = function (index) { 
+		accountManager.getAccountAtIndex(index).launchDashboard();
+	}
+	
+	accountManager.launchEmailForAccountAtIndex = function (index) { 
+		accountManager.getAccountAtIndex(index).launchEmail();
 	}
 	
 	accountManager.updateAccountWithDashboardData = function (account) { 
@@ -176,7 +196,11 @@ bp.accountManager = (function () {
 	
 	accountManager.markAccountAsBlocked = function (acount) {
 		var index = _getAccountIndex(account);
-		
+
+		document.getElementById('status' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_ms' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_dt' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
 		document.getElementById('credits' + index).style.color = BLOCKED_COLOR;
 		document.getElementById('accountName' + index).style.color = BLOCKED_COLOR;
 		document.getElementById('credits' + index).innerHTML = "BLOCKED";
@@ -185,7 +209,25 @@ bp.accountManager = (function () {
 	accountManager.markAccountAsBanned = function (account) {
 		var index = _getAccountIndex(account);
 		
-		// to-do
+		document.getElementById('status' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_ms' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_dt' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('credits' + index).style.color = BANNED_COLOR;
+		document.getElementById('accountName' + index).style.color = BANNED_COLOR;
+		document.getElementById('credits' + index).innerHTML = "BANNED!!!";		
+	}
+
+	accountManager.markAccountAsProblematic = function (account) {
+		var index = _getAccountIndex(account);
+		
+		document.getElementById('status' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_ms' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_dt' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('credits' + index).style.color = BANNED_COLOR;
+		document.getElementById('accountName' + index).style.color = BANNED_COLOR;
+		document.getElementById('credits' + index).innerHTML = "???";		
 	}
 	
 	return accountManager;
