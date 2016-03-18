@@ -1,7 +1,7 @@
 bp.licensing = (function () {
 	var NOT_CHECKED = -1;
 	
-	var _isLicensed = NOT_CHECKED
+	var _isLicensed = NOT_CHECKED;
 	
 	var licensing;
 	

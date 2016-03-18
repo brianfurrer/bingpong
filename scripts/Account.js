@@ -1,4 +1,6 @@
 bp.Account = function (user, pass) {
+	var NOT_CHECKED = -1;
+	
 	// constants
 	var MAX_LOGIN_ATTEMPTS = 5;
 	var MAX_LOGOUT_ATTEMPTS = 5;
@@ -6,8 +8,8 @@ bp.Account = function (user, pass) {
 	// class variables
 	var _username = user;
 	var _password = pass;
-	var _creditCount = 0;
-	var _isRedeemable = false;
+	var _creditCount = NOT_CHECKED;
+	var _isRedeemable = NOT_CHECKED;
 
 	// counters
 	var _loginAttemptCount = 0;
@@ -17,6 +19,10 @@ bp.Account = function (user, pass) {
 	
 	account.getUsername = function () { 
 		return _username;
+	}
+	
+	account.getPassword = function () { 
+		return _password;
 	}
 	
 	account.getCreditCount = function () { 
@@ -205,5 +211,5 @@ bp.Account = function (user, pass) {
 		// to-do
 	}
 	
-	return a;
+	return account;
 }

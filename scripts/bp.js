@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-24 (3/17/2016)
+// Current version: 0.21.1-25 (3/17/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -19,20 +19,14 @@ var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
 var dashboardData;
 var username;
 var password;
-var accountUsernames = new Array();
-var accountPasswords = new Array();
-var usernamesLeftToRun = new Array();
-var passwordsLeftToRun = new Array();
-var accountCredits = new Array();
-var accountRedeemStatuses = new Array();
+var accounts = [];
+var accountsLeftToRun = [];
 var accountCount = 0;
 var accountsDone = 0;
 var accountsToRun = 0;
 var currentAccountIndex = 0;
 var numberOfSearchesPerCredit = 2;
 var creditsToGet;
-var loginAttemptCount = 0;
-var logoutAttemptCount = 0;
 var dashboardTaskAttemptCount = 0;
 var searchAttemptCount = 0;
 var dashboardTaskURLs = new Array();
@@ -180,41 +174,21 @@ function onAccountCheckmarksChange() {
 	updateAccountManagerDisplay();
 }
 
-function updateCreditCounter(data, useSearchWindowData) {
-	if (useSearchWindowData) {
-		if (data.indexOf("<meta name=\"mobileoptimized\"") == -1) { // PC search
-			accountCredits[currentAccountIndex] = data.substring(data.indexOf("\"id_rc\"") + 8, data.indexOf("</span><span class=\"id_avatar sw_meIc\""));
-		} else { // mobile search
-			var temp = data.substring(data.indexOf("Transition.Event.refreshBalance(\'") + 33, data.length);
-			accountCredits[currentAccountIndex] = temp.substring(0, temp.indexOf("\'"));
-		}
-	} else {
-		tempIndex = data.indexOf("</div><div class=\"credits-label\">Available");
-		accountCredits[currentAccountIndex] = data.substring(tempIndex - 4, tempIndex); // get 4 characters for the credit count (may contain ">")
+function updateCreditCounter(data) {
+	var newCreditCount = data.match(/(?:<span class="credits-left"><div class="credits" title=")(\d+)(?:">)/)[1];
+	accounts[currentAccountIndex].setCreditCount(newCreditCount);
 
-		if (isNaN(accountCredits[currentAccountIndex])) { // 3 digit credit count
-			accountCredits[currentAccountIndex] = data.substring(tempIndex - 3, tempIndex);
-		}
+	// check if the goal reward is redeemable
+	isRedeemable = (data.indexOf("<div class=\"progress-percentage\">100%") == -1);
+	accounts[currentAccountIndex].setRedeemabilityStatus(isRedeemable);
 
-		if (isNaN(accountCredits[currentAccountIndex])) { // 2 digit credit count
-			accountCredits[currentAccountIndex] = data.substring(tempIndex - 2, tempIndex);
-		}
+	// store the redeemability status in a cookie
+	bp.cookies.set("isRedeemable" + currentAccountIndex, isRedeemable);
 
-		if (isNaN(accountCredits[currentAccountIndex])) { // 1 digit credit count
-			accountCredits[currentAccountIndex] = data.substring(tempIndex - 1, tempIndex);
-		}
-
-		// check if the goal reward is redeemable
-		isRedeemable = ((data.indexOf("<div class=\"progress-percentage\">100%") == -1) ? false : true);
-		accountRedeemStatuses[currentAccountIndex] = isRedeemable;
-
-		// store the redeemability status in a cookie
-		bp.cookies.set("isRedeemable" + currentAccountIndex, isRedeemable);
-
-		// update the credit counter display to reflect the redeemability status
-		document.getElementById('credits' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
-		document.getElementById('accountName' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
-	}
+	// update the credit counter display to reflect the redeemability status
+	
+	document.getElementById('credits' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
+	document.getElementById('accountName' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
 
    	// store the credit count in a cookie
    	bp.cookies.set("credits" + currentAccountIndex, accountCredits[currentAccountIndex]);
@@ -237,8 +211,6 @@ function performThisStep(stepNumber) {
 		finishRunningBingPong();
 	} else {
 		if (stepNumber == 0) { // log-out step
-			loginAttemptAccount = 0;
-			logoutAttemptAccount = 0;
 			accountsDone++;
 
 			// update the account manager display ONLY when initializing the first account
@@ -1312,7 +1284,6 @@ function updateAccountManagerDisplay() {
 		var cmHeaderCell = headerRow.insertCell(0);
 		var dsHeaderCell = headerRow.insertCell(1);
 		var msHeaderCell = headerRow.insertCell(2);
-		// var tqHeaderCell = headerRow.insertCell(3);
 		var dtHeaderCell = headerRow.insertCell(3);
 		var usernameHeaderCell = headerRow.insertCell(4);
 		var creditsHeaderCell = headerRow.insertCell(5);
@@ -1333,7 +1304,6 @@ function updateAccountManagerDisplay() {
 			var checkmarkCell = row.insertCell(0);
 			var dsStatusCell = row.insertCell(1);
 			var msStatusCell = row.insertCell(2);
-			// var tqStatusCell = row.insertCell(3);
 			var dtStatusCell = row.insertCell(3);
 			var usernameCell = row.insertCell(4);
 			var creditsCell = row.insertCell(5);
