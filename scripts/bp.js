@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-27 (3/18/2016)
+// Current version: 0.21.1-28 (3/18/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -17,14 +17,10 @@ var REDIRECTION_SERVICE = "http://www.nullrefer.com/?";
 
 // multiple account variables
 var dashboardData;
-var username;
-var password;
-var accounts = [];
-var accountsLeftToRun = [];
-var accountCount = 0;
 var accountsDone = 0;
 var accountsToRun = 0;
 var currentAccountIndex = 0;
+var currentAccount;
 var numberOfSearchesPerCredit = 2;
 var creditsToGet;
 var dashboardTaskAttemptCount = 0;
@@ -172,29 +168,6 @@ function onAccountCheckmarksChange() {
 
 	// update the account manager display
 	updateAccountManagerDisplay();
-}
-
-function updateCreditCounter(data) {
-	var newCreditCount = data.match(/(?:<span class="credits-left"><div class="credits" title=")(\d+)(?:">)/)[1];
-	accounts[currentAccountIndex].setCreditCount(newCreditCount);
-
-	// check if the goal reward is redeemable
-	isRedeemable = (data.indexOf("<div class=\"progress-percentage\">100%") == -1);
-	accounts[currentAccountIndex].setRedeemabilityStatus(isRedeemable);
-
-	// store the redeemability status in a cookie
-	bp.cookies.set("isRedeemable" + currentAccountIndex, isRedeemable);
-
-	// update the credit counter display to reflect the redeemability status
-	
-	document.getElementById('credits' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
-	document.getElementById('accountName' + currentAccountIndex).style.color = (isRedeemable ? "#00FF00" : "#FAFAFA");
-
-   	// store the credit count in a cookie
-   	bp.cookies.set("credits" + currentAccountIndex, accountCredits[currentAccountIndex]);
-
-   	// update the credit counter display
-   	document.getElementById('credits' + currentAccountIndex).innerHTML = (!isNaN(accountCredits[currentAccountIndex]) ? accountCredits[currentAccountIndex] : "<font color=\"red\">???</font>");
 }
 
 function stopRunningBingPong() {
@@ -1214,24 +1187,6 @@ function verifyDashboardTasks(callback) {
 			// return to caller
 			callback();
 		}
-	});
-}
-
-function verifyAccountInfo(username, password, callbackOnValid, callbackOnInvalid, callbackOnLogoutFailure) {
-	logoutOfAccount(function () {
-		logIntoAccount(username, password, function () {
-			callbackOnValid();
-		}, function () {
-			callbackOnInvalid();
-		}, function () {
-			callbackOnInvalid();
-		}, function () {
-			callbackOnInvalid();
-		}, function () {
-			callbackOnValid();
-		});
-	}, function () {
-		callbackOnLogoutFailure();
 	});
 }
 

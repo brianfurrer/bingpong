@@ -123,6 +123,24 @@ bp.Account = function (user, pass) {
 		});
 	}
 
+	account.infoIsValid = function (callbackOnValid, callbackOnInvalid, callbackOnLogoutFailure) { 
+		account.logOut(function () {
+			account.logIn(function () {
+				callbackOnValid();
+			}, function () {
+				callbackOnInvalid();
+			}, function () {
+				callbackOnInvalid();
+			}, function () {
+				callbackOnInvalid();
+			}, function () {
+				callbackOnValid();
+			});
+		}, function () {
+			callbackOnLogoutFailure();
+		});
+	}
+	
 	account.launchDashboard = function () {
 		bp.settings.disable();
 		bp.status.clearDefaultTimeout();
