@@ -19,6 +19,14 @@ bp.accountManager = (function () {
 		
 		return -1;
 	}
+
+	accountManager.getAccountIndex = function (account) { 
+		return _getAccountIndex(account); // debugging
+	}
+	
+	accountManager.getAccountAtIndex = function (index) { 
+		return _accounts[index];
+	}
 	
 	accountManager.init = function () { 
 		if (bp.cookies.get("accountCount") && bp.cookies.get("accountCount") !== "0") { // there are accounts stored in cookies
@@ -97,14 +105,6 @@ bp.accountManager = (function () {
 				optionsCell.innerHTML = "<a href=\"#\" onclick=\"launchDashboardForAccount(" + i + ");return false;\">Dashboard</a>&nbsp;&nbsp;&nbsp;<a href=\"#\" onclick=\"launchEmailForAccount(" + i + ");return false;\">Outlook</a>&nbsp;&nbsp;&nbsp;<a href=\"#\" onclick=\"removeAccount(" + i + ");return false;\">Remove</a>";
 			}
 		}
-	}
-	
-	accountManager.getAccountIndex = function (account) { 
-		return _getAccountIndex(account); // debugging
-	}
-	
-	accountManager.getAccountAtIndex = function (index) { 
-		return _accounts[index];
 	}
 
 	accountManager.addAccount = function (account) { 
