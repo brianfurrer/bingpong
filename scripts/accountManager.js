@@ -10,7 +10,7 @@ bp.accountManager = (function () {
 	var BLANK_STATUS = "<img src=\"/blue10.png\" width=\"10\" height=\"10\"></img>";
 	
 	var _accounts = [];
-	var _runnableAccounts = [];
+	var _enabledAccounts = [];
 	var _accountsChecked = [];
 	var _globalCheckmarkChecked = true;
 	
@@ -34,11 +34,11 @@ bp.accountManager = (function () {
 		return _accounts[index];
 	}
 	
-	accountManager.accountIsRunnable = function (account) { 
+	accountManager.accountIsEnabled = function (account) { 
 		var isRunnable = false;
 		
-		for (var i = 0, l = _runnableAccounts.length; i < l; i++) { 
-			if (account.equals(_runnableAccounts[i])) { 
+		for (var i = 0, l = _enabledAccounts.length; i < l; i++) { 
+			if (account.equals(_enabledAccounts[i])) { 
 				isRunnable = true;
 				break;
 			}
@@ -66,7 +66,7 @@ bp.accountManager = (function () {
 
 				if (isEnabled && (i <= MAX_ACCOUNTS_WITHOUT_LICENSE || (i > MAX_ACCOUNTS_WITHOUT_LICENSE && bp.licensing.getLicenseStatus()))) { // account is enabled and can be added to the runnable list
 					// add the account to the runnable list
-					_runnableAccounts.push(account);
+					_enabledAccounts.push(account);
 				} else { // disabled account
 					bp.cookies.set("isEnabled" + i, false);
 					_globalCheckmarkChecked = false;
@@ -94,7 +94,7 @@ bp.accountManager = (function () {
 			var creditsHeaderCell = headerRow.insertCell(5);
 			var optionsHeaderCell = headerRow.insertCell(6);
 			
-			cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\"  " + (_globalCheckmarkChecked ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"bp.accountManager.onGlobalCheckmarkChange();\"></center>";
+			cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\" " + (_globalCheckmarkChecked ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"bp.accountManager.onGlobalCheckmarkChange();\"></center>";
 			dsHeaderCell.innerHTML = "<center><i class=\"fa fa-laptop fa-lg\"></i></center>";
 			msHeaderCell.innerHTML = "<center><i class=\"fa fa-mobile fa-lg\"></i></center>";
 			dtHeaderCell.innerHTML = "<center><i class=\"fa fa-flag fa-lg\"></i></center>";
@@ -124,7 +124,7 @@ bp.accountManager = (function () {
 				var creditsCell = row.insertCell(5);
 				var optionsCell = row.insertCell(6);
 
-				checkmarkCell.innerHTML = "<center><input type=checkbox id=\"check" + i + "\" " + (isEnabled ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"onAccountCheckmarksChange();\"></center>";
+				checkmarkCell.innerHTML = "<center><input type=checkbox id=\"check" + i + "\" " + (isEnabled ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"bp.accountManager.onAccountCheckmarkChange(" + i + ");\"></center>";
 				dsStatusCell.innerHTML = "<center><span id=\"status" + i + "\">" + BLANK_STATUS + "</span></center>";
 				msStatusCell.innerHTML = "<center><span id=\"status_ms" + i + "\">" + BLANK_STATUS + "</span></center>";
 				dtStatusCell.innerHTML = "<center><span id=\"status_dt" + i + "\">" + BLANK_STATUS + "</span></center>";
@@ -151,11 +151,14 @@ bp.accountManager = (function () {
 	accountManager.addAccount = function (account) { 
 		// add account to list
 		_accounts.push(account);
+		_enabledAccounts.push(account);
 		
 		// update the cookies to reflect the new account
 		var newAccountCount = _accounts.length;
 		bp.cookies.set("username" + newAccountCount, account.getUsername());
 		bp.cookies.set("password" + newAccountCount, account.getPassword());
+		bp.cookies.set("isEnabled" + newAccountCount, true);
+		bp.cookies.set("credits" + i, account.getCreditCount());
 		bp.cookies.set("accountCount", newAccountCount);
 		
 		// update the account manager display
@@ -170,11 +173,12 @@ bp.accountManager = (function () {
 		_accounts.splice(accountIndex, 1);
 		
 		// delete the corresponding cookies
-		bp.cookies.remove("username" + accountIndex);
-		bp.cookies.remove("password" + accountIndex);
-		bp.cookies.remove("credits" + accountIndex);
-		bp.cookies.remove("isRedeemable" + accountIndex);
-
+		bp.cookies.remove("username" + (accountIndex + 1));
+		bp.cookies.remove("password" + (accountIndex + 1));
+		bp.cookies.remove("credits" + (accountIndex + 1));
+		bp.cookies.remove("isRedeemable" + (accountIndex + 1));
+		bp.cookies.remove("isEnabled" + (accountIndex + 1));
+		
 		// remove the account from the list
 		_accounts.splice(accountIndex, 1);
 
@@ -186,6 +190,8 @@ bp.accountManager = (function () {
 			bp.cookies.set("username" + (i + 1), _account[i].getUsername());
 			bp.cookies.set("password" + (i + 1), _account[i].getPassword());
 			bp.cookies.set("credits" + (i + 1), _account[i].getCreditCount());
+			// bp.cookies.set("isRedeemable" + (i + 1)); to what???
+			// bp.cookies.set("isEnabled" + (i + 1)); to what???
 		}
 
 		// delete the cookie corresponding to the old account
@@ -193,20 +199,39 @@ bp.accountManager = (function () {
 		bp.cookies.remove("password" + oldAccountCount);
 		bp.cookies.remove("credits" + oldAccountCount);
 		bp.cookies.remove("isRedeemable" + oldAccountCount);
-
+		bp.cookies.remove("isEnabled" + oldAccountCount);
+		
 		// update the account manager display
 		accountManager.updateDisplay(false);
 	}
 	
 	accountManager.removeAccountAtIndex = function (index) { 
-		accountManger.removeAccount(_getAccountAtIndex(index));
+		accountManger.removeAccount(accountManager.getAccountAtIndex(index));
 	}
 	
-	accountManager.removeAccountAtIndexFromRunnable = function (index) { 
+	accountManager.disableAccountAtIndex = function (index) { 
 		// remove the account from the runnable array
-		_runnableAccounts.splice(index, 1);
+		_enabledAccounts.splice(index, 1);
 		
+		// update enabled cookie
+		bp.cookies.set("isEnabled" + index, false);
+		
+		// update global checkmark
 		_globalCheckmarkChecked = false;
+	}
+	
+	accountManager.enableAccountAtIndex = function (index) { 
+		// add account to runnable list
+		_enabledAccounts.push(accountManager.getAccountAtIndex(index));
+		
+		// update enabled cookie
+		bp.cookies.set("isEnabled" + index, true);
+		
+		// update global checkmark if necessary
+		if (_enabledAccounts.length === _accounts.length) { // same number of accounts
+			_globalCheckmarkChecked = true;
+		}
+	}
 	
 	accountManager.launchDashboardForAccountAtIndex = function (index) { 
 		accountManager.getAccountAtIndex(index).launchDashboard();
