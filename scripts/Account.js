@@ -128,19 +128,19 @@ bp.Account = function (user, pass) {
 	}
 
 	account.verifyInfo = function (callbackOnValid, callbackOnInvalid, callbackOnLogoutFailure) { 
-		account.logOut(function () {
-			account.logIn(function () {
+		account.logOut(function () { // log-out successful
+			account.logIn(function () { // successful log-in
 				callbackOnValid();
-			}, function () {
+			}, function () { // log-in failed
 				callbackOnInvalid();
-			}, function () {
+			}, function () { // log-in succeeded, but the account is blocked
 				callbackOnInvalid();
-			}, function () {
+			}, function () { // log-in succeeded, but the account is banned
 				callbackOnInvalid();
-			}, function () {
+			}, function () { // log-in succeeded, but there is a CAPTCHA on the dashboard to solve before doing anything useful
 				callbackOnValid();
 			});
-		}, function () {
+		}, function () { // log-out failed
 			callbackOnLogoutFailure();
 		});
 	}
