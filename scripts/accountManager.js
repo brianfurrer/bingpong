@@ -148,7 +148,24 @@ bp.accountManager = (function () {
 		}
 	}
 
-	accountManager.addAccount = function (account) { 
+	// public version
+	accountManager.addAccount = function (account, verifyBeforeAdding, callbackOnSuccess, callbackOnFailure) { 
+		if (verifyBeforeAdding) { 
+			account.verifyInfo(function () { // account info has been verified
+				_addAccount(account);
+				callbackOnSuccess();
+			}, function () { // account info is invalid
+				callbackOnFailure();
+			}, function () { // log-out issues
+				callbackOnFailure();
+			});
+		} else {
+			_addAccount(account);
+		}
+	}
+	
+	// private version
+	function _addAccount(account) { 
 		// add account to list
 		_accounts.push(account);
 		_enabledAccounts.push(account);

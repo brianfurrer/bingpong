@@ -127,7 +127,7 @@ bp.Account = function (user, pass) {
 		});
 	}
 
-	account.infoIsValid = function (callbackOnValid, callbackOnInvalid, callbackOnLogoutFailure) { 
+	account.verifyInfo = function (callbackOnValid, callbackOnInvalid, callbackOnLogoutFailure) { 
 		account.logOut(function () {
 			account.logIn(function () {
 				callbackOnValid();
