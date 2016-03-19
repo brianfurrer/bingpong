@@ -1,5 +1,6 @@
 bp.accountManager = (function () { 
 	var MAX_ACCOUNTS_WITHOUT_LICENSE = 5;
+	var BAD_LOGIN_WARNING_TIMEOUT = 10;
 	var REDEEMABLE_COLOR = "#00F00";
 	var NOT_REDEEMABLE_COLOR = "#FAFAFA";
 	var BLOCKED_COLOR = "#FFFF00";
@@ -45,6 +46,19 @@ bp.accountManager = (function () {
 		}
 		
 		return isRunnable;
+	}
+	
+	accountManager.accountIsInManager = function (account) { 
+		var isInManager = true;
+		
+		for (var i = 0, i = _accounts.length; i < l; i++) { 
+			if (account.equals(accountManager.getAccountAtIndex(i))) { 
+				isInManager = true;
+				break;
+			}
+		}
+		
+		return isInManager;
 	}
 	
 	accountManager.init = function () { 
@@ -149,15 +163,19 @@ bp.accountManager = (function () {
 	}
 
 	// public version
-	accountManager.addAccount = function (account, verifyBeforeAdding, callbackOnSuccess, callbackOnFailure) { 
+	accountManager.addAccount = function (account, verifyBeforeAdding) { 
 		if (verifyBeforeAdding) { 
 			account.verifyInfo(function () { // account info has been verified
-				_addAccount(account);
-				callbackOnSuccess();
+				if (accountManager.accountIsInManager(account)) { // account has already been added
+					bph.externalTools.alert(account.getUsername() + " is already configured with Bing Pong.");
+				} else {
+					_addAccount(account);
+					bp.status.change(account.getUsername() + " has been successfully added to Bing Pong.", "&nbsp;", "&nbsp;");
+				}
 			}, function () { // account info is invalid
-				callbackOnFailure();
+				bp.status.changeWithTimeout("There was an issue logging into this account.", "Verify that your account is in good standing and try again.", "This message will disappear in %d second(s).", BAD_LOGIN_WARNING_TIMEOUT, function () {});
 			}, function () { // log-out issues
-				callbackOnFailure();
+				bph.externalTools.alert("There was an issue logging out of the previous account. Please contact me for further assistance.");
 			});
 		} else {
 			_addAccount(account);

@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-32 (3/18/2016)
+// Current version: 0.21.1-33 (3/18/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -1449,100 +1449,4 @@ function addAccountsInBulk() {
 
 function hideAccountList() {
    document.getElementById('accountinfo').innerHTML = "";
-}
-
-function addAccount(username, password, infoNeedsVerification, callbackOnSuccess, callbackOnFailure, callbackOnLogoutFailure) {
-	if (infoNeedsVerification) { // account was not "added in bulk"
-	 	verifyAccountInfo(username, password, function () { // account successfully verified
-	 		var duplicateAccount = false;
-
-	 		// check if this account is already in the list
-	 		for (var i = 1; i <= accountCount; i++) {
-	 			if (accountUsernames[i] == username) {
-	 				duplicateAccount = true;
-	 			}
-	 		}
-
-	 		if (duplicateAccount) {
-	 			bpAlert(username + " is already configured with Bing Pong.");
-	 		} else {
-	 			// incriment the number of accounts stored in Bing Pong
-	 			accountCount++;
-
-	 			// store the new username and password into the internal arrays
-	 			accountUsernames[accountCount] = username;
-	 			accountPasswords[accountCount] = password;
-
-	 			// store the new username, password, and account count into local storage
-	 			bp.cookies.set("username" + accountCount, username);
-	 			bp.cookies.set("password" + accountCount, password);
-	 			bp.cookies.set("accountCount", accountCount);
-
-	 			// update the account manager display
-	 			updateAccountManagerDisplay();
-
-	 			// return to caller
-	 			callbackOnSuccess();
-	 		}
-	 	}, function () { // account failed to verify
-	 		// return to caller
-	 		callbackOnFailure();
-	 	}, function () {
-	 		// return to caller
-	 		callbackOnLogoutFailure();
-		});
-	} else { // account was "added in bulk," so do not verify info
-		// incriment the number of accounts stored in Bing Pong
-	 	accountCount++;
-
-	 	// store the new username and password into the internal arrays
-	 	accountUsernames[accountCount] = username;
-	 	accountPasswords[accountCount] = password;
-
-	 	// store the new username, password, and account count into local storage
-	 	bp.cookies.set("username" + accountCount, username);
-	 	bp.cookies.set("password" + accountCount, password);
-	 	bp.cookies.set("accountCount", accountCount);
-
-	 	// update the account manager display
-	 	updateAccountManagerDisplay();
-
-	 	// return to caller
-	 	callbackOnSuccess();
-	 }
-}
-
-function removeAccount(accountIndex) {
-	// delete the corresponding cookies
-	bp.cookies.remove("username" + accountIndex);
-	bp.cookies.remove("password" + accountIndex);
-	bp.cookies.remove("credits" + accountIndex);
-	bp.cookies.remove("isRedeemable" + accountIndex);
-
-	// remove account entry #accountIndex from the arrays
-	accountUsernames.splice(accountIndex, 1);
-	accountPasswords.splice(accountIndex, 1);
-	accountCredits.splice(accountIndex, 1);
-	accountRedeemStatuses.splice(accountIndex, 1);
-
-	// update the new account count
-	accountCount--;
-	bp.cookies.set("accountCount", accountCount);
-
-	// shift all accounts > accountIndex down to "fill the gap"
-	for (var i = 1; i <= accountCount; i++) {
-		bp.cookies.set("username" + i, accountUsernames[i]);
-		bp.cookies.set("password" + i, accountPasswords[i]);
-		bp.cookies.set("credits" + i, accountCredits[i]);
-		bp.cookies.set("isRedeemable" + i, accountRedeemStatuses[i]);
-	}
-
-	// delete the cookie corresponding to the (accountCount + 1)th account
-	bp.cookies.remove("username" + (accountCount + 1));
-	bp.cookies.remove("password" + (accountCount + 1));
-	bp.cookies.remove("credits" + (accountCount + 1));
-	bp.cookies.remove("isRedeemable" + (accountCount + 1));
-
-	// update the account manager display
-	updateAccountManagerDisplay();
 }
