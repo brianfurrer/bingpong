@@ -12,7 +12,7 @@ bp.accountManager = (function () {
 	var _accounts = [];
 	var _runnableAccounts = [];
 	var _accountsChecked = [];
-	var _globalAccountCheckmarkChecked = true;
+	var _globalCheckmarkChecked = true;
 	
 	var accountManager = {};
 	
@@ -34,10 +34,25 @@ bp.accountManager = (function () {
 		return _accounts[index];
 	}
 	
+	accountManager.accountIsRunnable = function (account) { 
+		var isRunnable = false;
+		
+		for (var i = 0, l = _runnableAccounts.length; i < l; i++) { 
+			if (account.equals(_runnableAccounts[i])) { 
+				isRunnable = true;
+				break;
+			}
+		}
+		
+		return isRunnable;
+	}
+	
 	accountManager.init = function () { 
 		if (bp.cookies.get("accountCount") && bp.cookies.get("accountCount") !== "0") { // there are accounts stored in cookies
 			// loop through all the accounts stored
-			for (var i = 1; i <= bp.cookies.get("accountCount"); i++) { 
+			var numOfAccounts = bp.cookies.get("accountCount");
+			
+			for (var i = 1; i <= numOfAccounts; i++) { 
 				// get the account's information from cookies
 				var username = bp.cookies.get("username" + i);
 				var password = bp.cookies.get("password" + i);
@@ -46,12 +61,15 @@ bp.accountManager = (function () {
 				
 				// add the account to the account manager
 				var account = new bp.Account(username, password);
-				accountManager.addAccount(account);
 				account.setCreditCount(creditCount);
+				accountManager.addAccount(account);
 
-				if (!isEnabled) { // an account is disabled
-					// so uncheck the global checkmark
-					_globalAccountCheckmarkChecked = false;
+				if (isEnabled && (i <= MAX_ACCOUNTS_WITHOUT_LICENSE || (i > MAX_ACCOUNTS_WITHOUT_LICENSE && bp.licensing.getLicenseStatus()))) { // account is enabled and can be added to the runnable list
+					// add the account to the runnable list
+					_runnableAccounts.push(account);
+				} else { // disabled account
+					bp.cookies.set("isEnabled" + i, false);
+					_globalCheckmarkChecked = false;
 				}
 			}
 			
@@ -76,7 +94,7 @@ bp.accountManager = (function () {
 			var creditsHeaderCell = headerRow.insertCell(5);
 			var optionsHeaderCell = headerRow.insertCell(6);
 			
-			cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\"  " + (_globalAccountCheckmarkChecked ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"bp.accountManager.onGlobalCheckmarkChange();\"></center>";
+			cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\"  " + (_globalCheckmarkChecked ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"bp.accountManager.onGlobalCheckmarkChange();\"></center>";
 			dsHeaderCell.innerHTML = "<center><i class=\"fa fa-laptop fa-lg\"></i></center>";
 			msHeaderCell.innerHTML = "<center><i class=\"fa fa-mobile fa-lg\"></i></center>";
 			dtHeaderCell.innerHTML = "<center><i class=\"fa fa-flag fa-lg\"></i></center>";
@@ -95,13 +113,6 @@ bp.accountManager = (function () {
 				// sanitize the credit count and account enable/disable status
 				creditCount = (creditCount && creditCount >= 0) ? creditCount : "N/A";
 				isEnabled = (!isEnabled || isEnabled === "true");
-				
-				if (isEnabled && (i < MAX_ACCOUNTS_WITHOUT_LICENSE || (i >= MAX_ACCOUNTS_WITHOUT_LICENSE && bp.licensing.getLicenseStatus()))) { // account is enabled and can be added to the runnable list
-					// add the account to the runnable list
-					var account = new bp.Account(username, password);
-					account.setCreditCount(creditCount);
-					_runnableAccounts.push(account);
-				}
 
 				// populate the rows
 				var row = accountsTable.insertRow(-1);
@@ -124,10 +135,7 @@ bp.accountManager = (function () {
 				optionsCell.innerHTML += "<a href=\"#\" onclick=\"bp.accountManager.removeAccountAtIndex(" + i + ");return false;\">Remove</a>";
 				
 				// check for a license beyond the 5th account
-				if (i >= MAX_ACCOUNTS_WITHOUT_LICENSE && !bp.licensing.getLicenseStatus()) { // > 5 accounts without a license
-					// mark the account as disabled
-					bp.cookies.set("isEnabled" + i, false);
-					
+				if (i > MAX_ACCOUNTS_WITHOUT_LICENSE && !bp.licensing.getLicenseStatus()) { // > 5 accounts without a license
 					// dash out the 6th account and beyond when there is no license
 					document.getElementById('status' + i).innerHTML = DASHED_INDICATOR;
 					document.getElementById('status_ds' + i).innerHTML = DASHED_INDICATOR;
@@ -136,7 +144,6 @@ bp.accountManager = (function () {
 					document.getElementById('accountName' + i).innerHTML = "<strike>" + username + "</strike>";
 					document.getElementById('credits' + i).innerHTML = "<strike>" + credits + "</strike>";
 				}
-
 			}
 		}
 	}
@@ -194,6 +201,12 @@ bp.accountManager = (function () {
 	accountManager.removeAccountAtIndex = function (index) { 
 		accountManger.removeAccount(_getAccountAtIndex(index));
 	}
+	
+	accountManager.removeAccountAtIndexFromRunnable = function (index) { 
+		// remove the account from the runnable array
+		_runnableAccounts.splice(index, 1);
+		
+		_globalCheckmarkChecked = false;
 	
 	accountManager.launchDashboardForAccountAtIndex = function (index) { 
 		accountManager.getAccountAtIndex(index).launchDashboard();
@@ -264,17 +277,17 @@ bp.accountManager = (function () {
 		bp.cookies.set("isEnabled" + index, document.getElementById('check' + index).checked);
 		
 		// check to see if all accounts are checked, and check the global checkmark if so
-		_globalAccountCheckmarkChecked = true; // assume all accounts are checked
+		_globalCheckmarkChecked = true; // assume all accounts are checked
 		
 		for (var i = 0, l = _accounts.length; i < l; i++) { 
 			if (!bp.cookies.get("isEnabled" + i) || bp.cookies.get("isEnabled" + i) === "false") { // unchecked account
-				_globalAccountCheckmarkChecked = false;
+				_globalCheckmarkChecked = false;
 			}
 		}
 		
 		// update the global checkmark
-		bp.cookies.set("globalCheck", _globalAccountCheckmarkChecked);
-		document.getElementById('globalCheck').checked = _globalAccountCheckmarkChecked;
+		bp.cookies.set("globalCheck", _globalCheckmarkChecked);
+		document.getElementById('globalCheck').checked = _globalCheckmarkChecked;
 		
 		// update the account manager display
 		accountManager.updateDisplay(false);
@@ -282,9 +295,9 @@ bp.accountManager = (function () {
 	
 	accountManager.onGlobalCheckmarkChange = function () { 
 		// update the global checkmark status
-		_globalAccountCheckmarkChecked = document.getElementById('globalCheckmark').checked;
+		_globalCheckmarkChecked = document.getElementById('globalCheckmark').checked;
 		
-		if (_globalAccountCheckmarkChecked) { 
+		if (_globalCheckmarkChecked) { 
 			if (bp.licensing.getLicenseStatus()) { // licensed
 				// enable every account in the list
 				for (var i = 0, l = _accounts.length; i < l; i++) { 

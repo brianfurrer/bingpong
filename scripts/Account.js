@@ -40,6 +40,10 @@ bp.Account = function (user, pass) {
 	account.getRedeemabilityStatus = function () { 
 		return _isRedeemable;
 	}
+	
+	account.equals = function (otherAccount) { 
+		return (otherAccount.getUsername() === _username && otherAccount.getPassword() === _password);
+	}
 
 	// public version
 	account.logIn = function (callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
