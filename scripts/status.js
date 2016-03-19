@@ -1,11 +1,14 @@
 bp.status = (function () { 
-	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-34 (BETA)";
+	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-35 (BETA)";
 	
 	var _statusTimer;
 	
 	var status = {};
 	
 	status.change = function (statusText, remainingText, extraText) {
+		// clear any old timers
+		status.clearTimer();
+		
 		if (statusText !== "DO_NOT_CHANGE") {
 			document.getElementById('status').innerHTML = statusText;
 		}
@@ -22,6 +25,9 @@ bp.status = (function () {
 	status.changeWithTimeout = function (statusText, remainingText, extraText, timeInSeconds, callback) {
 		var secondsLeft = timeInSeconds;
 		var updateText;
+		
+		// clear any old timers
+		staus.clearTimer();
 		
 		(updateText = function () { 
 			var tempStatusText, tempRemainingText, tempExtraText;

@@ -1,11 +1,13 @@
 bp.accountManager = (function () { 
 	var MAX_ACCOUNTS_WITHOUT_LICENSE = 5;
 	var BAD_LOGIN_WARNING_TIMEOUT = 10;
+	var SUCCESSFUL_ADD_TIMEOUT = 5;
 	var REDEEMABLE_COLOR = "#00F00";
 	var NOT_REDEEMABLE_COLOR = "#FAFAFA";
 	var BLOCKED_COLOR = "#FFFF00";
 	var BANNED_COLOR = "#FF0000";
-	var RUNNING_INDICATOR = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
+	var RUNNING_INDICATOR_SMALL = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
+	var RUNNING_INDICATOR_NORMAL = "<img src=\"loader.gif\" width=\"16\" height=\"16\"></img>";
 	var WARNING_INDICATOR = "<i class=\"fa fa-exclamation-triangle\"></i>";
 	var DASHED_INDICATOR = "<i class=\"fa fa-minus\"></i>";
 	var BLANK_STATUS = "<img src=\"/blue10.png\" width=\"10\" height=\"10\"></img>";
@@ -162,19 +164,29 @@ bp.accountManager = (function () {
 		}
 	}
 
-	// public version
-	accountManager.addAccount = function (account, verifyBeforeAdding) { 
+	accountManager.addAccountInManager = function (account, verifyBeforeAdding) { 
 		if (verifyBeforeAdding) { 
+			bp.settings.disable(true);
+			accountManager.disable();
+			bp.status.change(RUNNING_INDICATOR_NORMAL + " Verifying account credentials...", "&nbsp;", "&nbsp;");
+			
 			account.verifyInfo(function () { // account info has been verified
+				accountManager.enable();
+				
 				if (accountManager.accountIsInManager(account)) { // account has already been added
+					bp.status.reset();
 					bph.externalTools.alert(account.getUsername() + " is already configured with Bing Pong.");
 				} else {
 					_addAccount(account);
-					bp.status.change(account.getUsername() + " has been successfully added to Bing Pong.", "&nbsp;", "&nbsp;");
+					bp.status.changeWithTimeout(account.getUsername() + " has been successfully added to Bing Pong.", "&nbsp;", "&nbsp;", SUCCESSFUL_ADD_TIMEOUT, function () {});
 				}
 			}, function () { // account info is invalid
+				bp.status.reset();
+				accountManager.enable();
 				bp.status.changeWithTimeout("There was an issue logging into this account.", "Verify that your account is in good standing and try again.", "This message will disappear in %d second(s).", BAD_LOGIN_WARNING_TIMEOUT, function () {});
 			}, function () { // log-out issues
+				bp.status.reset();
+				accountManager.enable();
 				bph.externalTools.alert("There was an issue logging out of the previous account. Please contact me for further assistance.");
 			});
 		} else {
@@ -182,7 +194,6 @@ bp.accountManager = (function () {
 		}
 	}
 	
-	// private version
 	function _addAccount(account) { 
 		// add account to list
 		_accounts.push(account);
@@ -371,6 +382,58 @@ bp.accountManager = (function () {
 			}
 		}
 	}
+	
+	accountManager.disable = function () { 
+		// account manager selectors
+		document.getElementById('managerSection1').disabled = true;
+		document.getElementById('managerSection2').disabled = true;
+		document.getElementById('managerSection3').disabled = true;
+		
+		// "add account" section
+		try {
+			document.getElementById('username').disabled = true;
+			document.getElementById('password').disabled = true;
+			document.getElementById('addAccountButton').disabled = true;
+		} catch (e) {};
+		
+		// "add accounts in bulk" section
+		try {
+			document.getElementById('bulkField').disabled = true;
+			document.getElementById('bulk_button').disabled = true;
+		} catch (e) {};
+		
+		// "export accounts section" section
+		try {
+			document.getElementById('exportedAccounts').disabled = true;
+			document.getElementById('exportAccounts').disabled = true;
+		} catch (e) {};
+	}
+		
+	accountManager.enable = function () { 
+		// account manager selectors
+		document.getElementById('managerSection1').disabled = false;
+		document.getElementById('managerSection2').disabled = false;
+		document.getElementById('managerSection3').disabled = false;
+		
+		// "add account" section
+		try {
+			document.getElementById('username').disabled = false;
+			document.getElementById('password').disabled = false;
+			document.getElementById('addAccountButton').disabled = false;
+		} catch (e) {};
+		
+		// "add accounts in bulk" section
+		try {
+			document.getElementById('bulkField').disabled = false;
+			document.getElementById('bulk_button').disabled = false;
+		} catch (e) {};
+		
+		// "export accounts section" section
+		try {
+			document.getElementById('exportedAccounts').disabled = false;
+			document.getElementById('exportAccounts').disabled = false;
+		} catch (e) {};
+	}	
 	
 	return accountManager;
 })();

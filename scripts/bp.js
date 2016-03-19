@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-34 (3/19/2016)
+// Current version: 0.21.1-35 (3/19/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -1336,7 +1336,7 @@ function updateAccountManagerDisplay() {
 
 function updateAddAccountSection() {
 	if (sectionToDisplay == 1) { // add accounts one at a time (with verification)
-		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"manager1\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager2\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager3\" name=\"add1\" onclick=\"changeAddAccountSection()\">Export accounts</form><span id=\"accountAdder\"></span>";
+		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"managerSelector1\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector2\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector3\" name=\"add1\" onclick=\"changeAddAccountSection()\">Export accounts</form><span id=\"accountAdder\"></span>";
 
 		// show the add account section if there are less than 5 accounts linked or if the user has a license
 		if (accountCount < 5 || bp.licensing.getLicenseStatus()) {
@@ -1345,7 +1345,7 @@ function updateAddAccountSection() {
 			document.getElementById('accountAdder').innerHTML = "<b>To link another account to Bing Pong, you must either remove an already linked account or purchase a Bing Pong Helper license.<br>You may purchase a license from the Bing Pong Helper options page.</b>";
 		}
 	} else if (sectionToDisplay == 2) { // add accounts in bulk
-		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"manager1\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager2\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager3\" name=\"add1\" onclick=\"changeAddAccountSection()\">Export accounts</form><span id=\"accountAdder\"></span>";
+		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"managerSelector1\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector2\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector3\" name=\"add1\" onclick=\"changeAddAccountSection()\">Export accounts</form><span id=\"accountAdder\"></span>";
 
 		// check for a license, and only show the account adding section if licensed
 		if (bp.licensing.getLicenseStatus()) {
@@ -1354,7 +1354,7 @@ function updateAddAccountSection() {
 			document.getElementById('accountAdder').innerHTML = "<b>Adding accounts in bulk requires a Bing Pong Helper license.<br>You may purchase a license from the Bing Pong Helper options page.</b>";
 		}
 	} else { // exporter
-		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"manager1\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager2\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"manager3\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Export accounts</form><span id=\"accountAdder\"></span>";
+		document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"managerSelector1\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector2\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector3\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Export accounts</form><span id=\"accountAdder\"></span>";
 		document.getElementById('accountAdder').innerHTML = "<b>Coming soon...</b>";
 	}
 
@@ -1362,63 +1362,15 @@ function updateAddAccountSection() {
 }
 
 function changeAddAccountSection() {
-	if (document.getElementById('manager1').checked) {
+	if (document.getElementById('managerSelector1').checked) {
 		sectionToDisplay = 1;
-	} else if (document.getElementById('manager2').checked) {
+	} else if (document.getElementById('managerSelector2').checked) {
 		sectionToDisplay = 2;
 	} else {
 	 	sectionToDisplay = 3;
 	}
 
 	updateAccountManagerDisplay();
-}
-
-function addAccountInManager() {
-	bp.settings.disable(true);
-	bp.status.clearTimer();
-	document.getElementById('username').disabled = true;
-	document.getElementById('password').disabled = true;
-	document.getElementById('addAccountButton').disabled = true;
-	bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Verifying account credentials...", "&nbsp;", "&nbsp;");
-
-	addAccount(document.getElementById('username').value, document.getElementById('password').value, true, function () { // successful add
-		bp.settings.enable();
-		document.getElementById('username').disabled = false;
-		document.getElementById('password').disabled = false;
-		document.getElementById('addAccountButton').disabled = false;
-
-		bp.status.change(accountUsernames[accountCount] + " has been successfully added to Bing Pong.", "DO_NOT_CHANGE", "DO_NOT_CHANGE");
-		statusTimeout = setTimeout(function () {
-			bp.status.change(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
-		}, GOOD_LOGIN_MESSAGE_TIMEOUT);
-	}, function () { // bad login info
-		bp.settings.enable();
-		document.getElementById('username').disabled = false;
-		document.getElementById('password').disabled = false;
-		document.getElementById('addAccountButton').disabled = false;
-
-		tempSeconds = BAD_LOGIN_WARNING_TIMEOUT;
-		bp.status.change("There was is an issue logging into this account.", "Verify that your account is in good standing and try again.", "This message will disappear in " + tempSeconds + " seconds.");
-		statusTimeout = setInterval(function () {
-			tempSeconds--;
-
-			if (tempSeconds > 1) {
-				bp.status.change("DO_NOT_CHANGE", "DO_NOT_CHANGE", "This message will disappear in " + tempSeconds + " seconds.");
-			} else if (tempSeconds == 1) {
-				bp.status.change("DO_NOT_CHANGE", "DO_NOT_CHANGE", "This message will disappear in 1 second.");
-			} else {
-				bp.status.change(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
-				bp.status.clearTimer();
-			}
-		}, 1000);
-	}, function () { // logout problems
-		bp.settings.enable();
-		document.getElementById('username').disabled = false;
-		document.getElementById('password').disabled = false;
-		document.getElementById('addAccountButton').disabled = false;
-		bp.status.reset();
-		bpAlert("There was an issue logging out of the previous account. Please contact me for further assistance.");
-	});
 }
 
 function addAccountsInBulk() {
