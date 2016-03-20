@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-35 (3/19/2016)
+// Current version: 0.21.1-37 (3/19/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -547,15 +547,6 @@ function finishRunningBingPong() {
 	} else {
 		bp.status.changeTextWithDefaultTimeout("Done. <a href=\"http://www.bing.com/rewards/dashboard\" target=\"_blank\">Launch the Bing Rewards dashboard?</a>", "DO_NOT_CHANGE", "DO_NOT_CHANGE", 20000);
 	}
-}
-
-function changeButtonText(newButtonText) {
-	previousButtonText = document.getElementById('runBingPongButton').value;
-	document.getElementById('runBingPongButton').value = newButtonText;
-}
-
-function revertButtonText() {
-	document.getElementById('runBingPongButton').value = previousButtonText;
 }
 
 function parseTrendingSearchTerms(callback) {
@@ -1290,7 +1281,7 @@ function updateAccountManagerDisplay() {
 
 		// update the "Run Bing Pong" button to show the number of accounts, but only do it if the but is not running
 		if (!accountsDone) {
-			changeButtonText("Run Bing Pong (" + accountCount + (accountCount == 1 ? " account" : " accounts") + " configured)");
+			bp.button.setText("Run Bing Pong (" + accountCount + (accountCount == 1 ? " account" : " accounts") + " configured)");
 		}
 
    		// add a section to add accounts below the account list
@@ -1327,7 +1318,7 @@ function updateAccountManagerDisplay() {
 			}
 		}
 	} else {
-		changeButtonText("Run Bing Pong (0 accounts configured)");
+		bp.button.setText("Run Bing Pong (0 accounts configured)");
 
 		document.getElementById('accountManager').innerHTML = "<br><b>No accounts are currently linked with Bing Pong. Link an account via the options below.</b><br><br>";
 		updateAddAccountSection();
