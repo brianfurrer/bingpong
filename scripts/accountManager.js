@@ -478,6 +478,14 @@ bp.accountManager = (function () {
 		document.getElementById('managerSection1').disabled = true;
 		document.getElementById('managerSection2').disabled = true;
 		document.getElementById('managerSection3').disabled = true;
+
+		// enable the global checkbox in the accounts list
+		document.getElementById('globalCheckmark').disabled = true;
+		
+		// enable the checkbox for each account 
+		for (var i = 1, l = _accounts.length; i <= l; i++) { 
+			document.getElementById('check' + i).disabled = true;
+		}
 		
 		// "add account" section
 		try {
@@ -504,6 +512,14 @@ bp.accountManager = (function () {
 		document.getElementById('managerSection1').disabled = false;
 		document.getElementById('managerSection2').disabled = false;
 		document.getElementById('managerSection3').disabled = false;
+		
+		// enable the global checkbox in the accounts list
+		document.getElementById('globalCheckmark').disabled = false;
+		
+		// enable the checkbox for each account 
+		for (var i = 1, l = _accounts.length; i <= l; i++) { 
+			document.getElementById('check' + i).disabled = false;
+		}
 		
 		// "add account" section
 		try {

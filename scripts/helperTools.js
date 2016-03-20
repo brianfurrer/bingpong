@@ -69,7 +69,7 @@ bp.helperTools = (function () {
 			try {
 				callback(response.tabIsDead, response.captchaDetected);
 			} catch (e) {
-				helperTools.checkForSearchCaptcha(callback);
+				bp.helperTools.checkForSearchCaptcha(callback);
 			}
 		});
 	}
@@ -127,7 +127,7 @@ bp.helperTools = (function () {
 			try {
 				callback(response.queries);
 			} catch (e) {
-				helperTools.getWikiArticles(callback);
+				bp.helperTools.getWikiArticles(callback);
 			}
 		});
 	}
@@ -137,7 +137,7 @@ bp.helperTools = (function () {
 			try {
 				callback(response);
 			} catch (e) {
-				helperTools.performGETRequest(ajaxURL, responseIsJSON, callback);
+				bp.helperTools.performGETRequest(ajaxURL, responseIsJSON, callback);
 			}
 		});
 	}
@@ -147,7 +147,7 @@ bp.helperTools = (function () {
 			try {
 				callback(response.contents);
 			} catch (e) {
-				helperTools.getSearchWindowContents(callback);
+				bp.helperTools.getSearchWindowContents(callback);
 			}
 		});
 	}
@@ -187,7 +187,7 @@ bp.helperTools = (function () {
 				callback(response);
 			});
 		} catch (e) { 
-			helperTools.checkForLicense(callback);
+			bp.helperTools.checkForLicense(callback);
 		}
 	}
 	

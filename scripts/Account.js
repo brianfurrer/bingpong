@@ -64,7 +64,6 @@ bp.Account = function (user, pass) {
 				});
 			});
 		} else {
-			_loginAttemptCount = 0;
 			callbackOnFailure();
 		}
 	}
@@ -84,7 +83,6 @@ bp.Account = function (user, pass) {
 				_checkForSuccessfulLogout(callbackOnSuccess, callbackOnFailure);
 			});
 		} else {
-			_logoutAttemptCount = 0;
 			callbackOnFailure();
 		}
 	}		

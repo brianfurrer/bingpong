@@ -2,7 +2,7 @@ bp.button = (function () {
 	var DEFAULT_BUTTON_TEXT = "Run Bing Pong (35 searches)";
 	
 	var _previousText = DEFAULT_BUTTON_TEXT;
-	var _buttonElement = document.getElementById('bpButton');
+	var _buttonElement = document.getElementById('runBingPongButton');
 	
 	var button = {};
 	
@@ -22,7 +22,8 @@ bp.button = (function () {
 	
 	button.stopRunning = function () { 
 		bp.button.setPreviousText();
-		stopRunningBingPong(); // will be defined somewhere else --- this'll probably be in a different namespace than window
+		_buttonElement.onclick = runBingPong;
+		stopRunningBingPong();
 	}
 	
 	button.setPreviousText = function () { 
