@@ -123,7 +123,7 @@ bp.accountManager = (function () {
 			optionsHeaderCell.innerHTML = "<center><b>Options</b></center>";
 			
 			// loop through the accounts stored
-			for (var i = 1; i <= bp.cookies.get("accountCount"); i++) { 
+			for (var i = 1, accountCount = parseInt(bp.cookies.get("accountCount")); i <= accountCount; i++) { 
 				// get the account's information from cookies
 				var username = bp.cookies.get("username" + i);
 				var password = bp.cookies.get("password" + i);
@@ -169,7 +169,13 @@ bp.accountManager = (function () {
 				if (isRedeemable) { 
 					bp.accountManager.markAccountAsRedeemable(account);
 				}
+				
+				// set the run button text
+				bp.button.setText("Run Bing Pong (" + accountCount + (accountCount === 1 ? " account" : " accounts") + " configured)");
 			}
+		} else { // no accounts linked
+			bp.button.setText("Run Bing Pong (0 accounts configured)");
+			document.getElementById('accountManager').innerHTML = "<br><b>No accounts are currently linked with Bing Pong. Link an account via the options below.</b><br><br>";
 		}
 		
 		if (document.getElementById('managerSelector1')) { // add account section exists already
@@ -271,7 +277,7 @@ bp.accountManager = (function () {
 			if (accountManager.accountIsInManager(account)) { // account is a duplicate
 				// ignore for now
 			} else {
-				if (fieldLines[i].indexOf(":") != -1) { // account is fine
+				if (fieldLines[i].indexOf(":") !== -1) { // account is fine
 					_addAccount(account);
 				} else {
 					bph.externalTools.alert("There was a problem parsing line " + (i + 1) + " (" + fieldLines[i] + "). This line and all lines after it have not been parsed.");
