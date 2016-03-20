@@ -1,9 +1,12 @@
 bp.licensing = (function () {
 	var NOT_CHECKED = -1;
+	var MAX_ACCOUNTS_WITHOUT_LICENSE = 5;
 	
 	var _isLicensed = NOT_CHECKED;
 	
 	var licensing;
+	
+	licensing.MAX_ACCOUNTS_WITHOUT_LICENSE = MAX_ACCOUNTS_WITHOUT_LICENSE;
 	
 	// simply return the last obtained license status
 	licensing.getLicenseStatus = function () {

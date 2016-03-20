@@ -1,5 +1,7 @@
 bp.accountManager = (function () { 
-	var MAX_ACCOUNTS_WITHOUT_LICENSE = 5;
+	var ADD_ONE_ACCOUNT_SECTION = 1;
+	var ADD_ACCOUNT_BULK_SECTION = 2;
+	var EXPORT_ACCOUNTS_SECTION = 3;
 	var BAD_LOGIN_WARNING_TIMEOUT = 10;
 	var SUCCESSFUL_ADD_TIMEOUT = 5;
 	var REDEEMABLE_COLOR = "#00FF00";
@@ -54,7 +56,7 @@ bp.accountManager = (function () {
 		var isInManager = true;
 		
 		for (var i = 0, i = _accounts.length; i < l; i++) { 
-			if (account.equals(accountManager.getAccountAtIndex(i))) { 
+			if (account.equals(bp.accountManager.getAccountAtIndex(i))) { 
 				isInManager = true;
 				break;
 			}
@@ -80,9 +82,9 @@ bp.accountManager = (function () {
 				var account = new bp.Account(username, password);
 				account.setCreditCount(creditCount);
 				account.setRedeemabilityStatus(isRedeemable);
-				accountManager.addAccount(account);
+				bp.accountManager.addAccount(account);
 
-				if (isEnabled && (i <= MAX_ACCOUNTS_WITHOUT_LICENSE || (i > MAX_ACCOUNTS_WITHOUT_LICENSE && bp.licensing.getLicenseStatus()))) { // account is enabled and can be added to the runnable list
+				if (isEnabled && (i <= bp.licensing.MAX_ACCOUNTS_WITHOUT_LICENSE || (i > bp.licensing.MAX_ACCOUNTS_WITHOUT_LICENSE && bp.licensing.getLicenseStatus()))) { // account is enabled and can be added to the runnable list
 					// add the account to the runnable list
 					_enabledAccounts.push(account);
 				} else { // disabled account
@@ -92,7 +94,7 @@ bp.accountManager = (function () {
 			}
 			
 			// update the account manager display
-			accountManager.updateDisplay(false);
+			bp.accountManager.updateDisplay(false);
 		}
 	}
 	
@@ -153,7 +155,7 @@ bp.accountManager = (function () {
 				optionsCell.innerHTML += "<a href=\"#\" onclick=\"bp.accountManager.removeAccountAtIndex(" + i + ");return false;\">Remove</a>";
 				
 				// check for a license beyond the 5th account
-				if (i > MAX_ACCOUNTS_WITHOUT_LICENSE && !bp.licensing.getLicenseStatus()) { // > 5 accounts without a license
+				if (i > bp.licensing.MAX_ACCOUNTS_WITHOUT_LICENSE && !bp.licensing.getLicenseStatus()) { // > 5 accounts without a license
 					// dash out the 6th account and beyond when there is no license
 					document.getElementById('status' + i).innerHTML = DASHED_INDICATOR;
 					document.getElementById('status_ds' + i).innerHTML = DASHED_INDICATOR;
@@ -165,10 +167,50 @@ bp.accountManager = (function () {
 				
 				// mark qualifying accounts as redeemable
 				if (isRedeemable) { 
-					accountManager.markAccountAsRedeemable(account);
+					bp.accountManager.markAccountAsRedeemable(account);
 				}
 			}
 		}
+		
+		if (document.getElementById('managerSelector1')) { // add account section exists already
+			if (document.getElementById('managerSelector1').checked) { 
+				bp.accountManager.updateAddAccountSection(ADD_ONE_ACCOUNT_SECTION);
+			} else if (document.getElementById('managerSelector2').checked) { 
+				bp.accountManager.updateAddAccountSection(ADD_ACCOUNTS_BULK_SECTION);
+			} else {
+				bp.accountManager.updateAddAccountSection(EXPORT_ACCOUNTS_SECTION);
+			}
+		} else { // doesn't exist
+			// create it and default to the "add one account" section
+			bp.accountManager.updateAddAccountSection(ADD_ONE_ACCOUNT_SECTION);
+		}
+	}
+	
+	accountManager.updateAddAccountSection = function (sectionToDisplay) { 
+		if (sectionToDisplay === ADD_ONE_ACCOUNT_SECTION) { // add accounts one at a time (with verification)
+			document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"managerSelector1\" name=\"add1\" onclick=\"bp.accountManager.changeAddAccountSection(1)\" checked>Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector2\" name=\"add1\" onclick=\"bp.accountManager.changeAddAccountSection(2)\">Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector3\" name=\"add1\" onclick=\"bp.accountManager.changeAddAccountSection(3)\">Export accounts</form><span id=\"accountAdder\"></span>";
+
+			// show the add account section if there are less than 5 accounts linked or if the user has a license
+			if (_accounts.length < bp.licensing.MAX_ACCOUNTS_WITHOUT_LICENSE || bp.licensing.getLicenseStatus()) {
+				document.getElementById('accountAdder').innerHTML = "<b>Add an account:</b><br>E-mail:<input placeholder=\"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Microsoft Live\" id=\"username\" size=30><br>Password:<input type=\"password\" placeholder=\"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Password\" id=\"password\" size=25><br><input type=button id=\"addAccountButton\" value=\"Add account\" onclick=\"addAccountInManager()\">";
+			} else { // not qualified to add more accounts (>5 accounts and no license)
+				document.getElementById('accountAdder').innerHTML = "<b>To link another account to Bing Pong, you must either remove an already linked account or purchase a Bing Pong Helper license.<br>You may purchase a license from the Bing Pong Helper options page.</b>";
+			}
+		} else if (sectionToDisplay === ADD_ACCOUNTS_BULK_SECTION) { // add accounts in bulk
+			document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"managerSelector1\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector2\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector3\" name=\"add1\" onclick=\"changeAddAccountSection()\">Export accounts</form><span id=\"accountAdder\"></span>";
+
+			// check for a license, and only show the account adding section if licensed
+			if (bp.licensing.getLicenseStatus()) {
+				document.getElementById('accountAdder').innerHTML = "<b>Add accounts in bulk:</b><br><i>Add each account's information in the format <b>username:password</b> and enter one account per line.<br>(<b>NOTE: The account credentials you supply will not be verified. Make sure they are correct.</b>)</i><br><textarea id=\"bulkField\" rows=8 cols=65></textarea><br><input type=button id=\"bulk_button\" value=\"Add accounts\" onClick=\"addAccountsInBulk()\">";
+			} else {
+				document.getElementById('accountAdder').innerHTML = "<b>Adding accounts in bulk requires a Bing Pong Helper license.<br>You may purchase a license from the Bing Pong Helper options page.</b>";
+			}
+		} else { // exporter
+			document.getElementById('accountManager').innerHTML += "<form name=\"add\"><input type=\"radio\" id=\"managerSelector1\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add one account&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector2\" name=\"add1\" onclick=\"changeAddAccountSection()\">Add accounts in bulk&nbsp;&nbsp;&nbsp;<input type=\"radio\" id=\"managerSelector3\" name=\"add1\" onclick=\"changeAddAccountSection()\" checked>Export accounts</form><span id=\"accountAdder\"></span>";
+			document.getElementById('accountAdder').innerHTML = "<b>Coming soon...</b>";
+		}
+
+		document.getElementById('accountManager').innerHTML += "<br><br><br><br><br>";
 	}
 
 	function _addAccount(account) { 
@@ -185,17 +227,17 @@ bp.accountManager = (function () {
 		bp.cookies.set("accountCount", newAccountCount);
 		
 		// update the account manager display
-		accountManager.updateDisplay(false);
+		bp.accountManager.updateDisplay(false);
 	}
 	
 	accountManager.addAccountInManager = function (account, verifyBeforeAdding) { 
 		if (verifyBeforeAdding) { 
 			bp.settings.disable(true);
-			accountManager.disable();
+			bp.accountManager.disable();
 			bp.status.change(RUNNING_INDICATOR_NORMAL + " Verifying account credentials...", "&nbsp;", "&nbsp;");
 			
 			account.verifyInfo(function () { // account info has been verified
-				accountManager.enable();
+				bp.accountManager.enable();
 				
 				if (accountManager.accountIsInManager(account)) { // account has already been added
 					bp.status.reset();
@@ -206,11 +248,11 @@ bp.accountManager = (function () {
 				}
 			}, function () { // account info is invalid
 				bp.status.reset();
-				accountManager.enable();
+				bp.accountManager.enable();
 				bp.status.changeWithTimeout("There was an issue logging into this account.", "Verify that your account is in good standing and try again.", "This message will disappear in %d second(s).", BAD_LOGIN_WARNING_TIMEOUT, function () {});
 			}, function () { // log-out issues
 				bp.status.reset();
-				accountManager.enable();
+				bp.accountManager.enable();
 				bph.externalTools.alert("There was an issue logging out of the previous account. Please contact me for further assistance.");
 			});
 		} else {
@@ -232,7 +274,7 @@ bp.accountManager = (function () {
 				if (fieldLines[i].indexOf(":") != -1) { // account is fine
 					_addAccount(account);
 				} else {
-					bpAlert("There was a problem parsing line " + (i + 1) + " (" + fieldLines[i] + "). This line and all lines after it have not been parsed.");
+					bph.externalTools.alert("There was a problem parsing line " + (i + 1) + " (" + fieldLines[i] + "). This line and all lines after it have not been parsed.");
 					return false;
 				}
 			}
@@ -276,11 +318,11 @@ bp.accountManager = (function () {
 		bp.cookies.remove("isEnabled" + oldAccountCount);
 		
 		// update the account manager display
-		accountManager.updateDisplay(false);
+		bp.accountManager.updateDisplay(false);
 	}
 	
 	accountManager.removeAccountAtIndex = function (index) { 
-		accountManger.removeAccount(accountManager.getAccountAtIndex(index));
+		accountManger.removeAccount(bp.accountManager.getAccountAtIndex(index));
 	}
 	
 	accountManager.disableAccountAtIndex = function (index) { 
@@ -296,7 +338,7 @@ bp.accountManager = (function () {
 	
 	accountManager.enableAccountAtIndex = function (index) { 
 		// add account to runnable list
-		_enabledAccounts.push(accountManager.getAccountAtIndex(index));
+		_enabledAccounts.push(bp.accountManager.getAccountAtIndex(index));
 		
 		// update enabled cookie
 		bp.cookies.set("isEnabled" + index, true);
@@ -308,11 +350,11 @@ bp.accountManager = (function () {
 	}
 	
 	accountManager.launchDashboardForAccountAtIndex = function (index) { 
-		accountManager.getAccountAtIndex(index).launchDashboard();
+		bp.accountManager.getAccountAtIndex(index).launchDashboard();
 	}
 	
 	accountManager.launchEmailForAccountAtIndex = function (index) { 
-		accountManager.getAccountAtIndex(index).launchEmail();
+		bp.accountManager.getAccountAtIndex(index).launchEmail();
 	}
 	
 	accountManager.updateAccountWithDashboardData = function (account) { 
@@ -403,7 +445,7 @@ bp.accountManager = (function () {
 		document.getElementById('globalCheck').checked = _globalCheckmarkChecked;
 		
 		// update the account manager display
-		accountManager.updateDisplay(false);
+		bp.accountManager.updateDisplay(false);
 	}
 	
 	accountManager.onGlobalCheckmarkChange = function () { 
@@ -418,7 +460,7 @@ bp.accountManager = (function () {
 				}
 			} else { // unlicensed
 				// enable up to the first five accounts
-				for (var i = 0, l = Math.min(_accounts.length, MAX_ACCOUNTS_WITHOUT_LICENSE); i < l; i++) { 
+				for (var i = 0, l = Math.min(_accounts.length, bp.licensing.MAX_ACCOUNTS_WITHOUT_LICENSE); i < l; i++) { 
 					bp.cookies.set("check" + i, true);
 				}
 			}
