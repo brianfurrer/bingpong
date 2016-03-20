@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-39 (3/20/2016)
+// Current version: 0.21.1-42 (3/20/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -91,7 +91,7 @@ function checkBrowserCompatibility(callback) {
 				};
 			}
 
-			if (!bp.helperTools.getHelperInstallionStatus() || bp.helperTools.isUsingCompatibleHelperVersion()) {
+			if (!bp.helperTools.getHelperInstallationStatus() || bp.helperTools.isUsingCompatibleHelperVersion()) {
 				bp.licensing.updateLicenseStatus(function (isLicensed) {
 					// remove ads for licensed users
 					bp.cookies.set("removeAd", isLicensed);
@@ -347,7 +347,7 @@ function performThisStep(stepNumber) {
 		} else if (stepNumber == 4) { // perform PC searches
 			bp.status.change("DO_NOT_CHANGE", "&nbsp;", "DO_NOT_CHANGE");
 
-			if (bp.helperTools.getHelperInstallionStatus()) {
+			if (bp.helperTools.getHelperInstallationStatus()) {
 				// GA tracking
 				ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', regularSearchesToPerform);
 
@@ -504,7 +504,7 @@ function runBingPong() {
 
 		// run the bot
 		performThisStep(0);
-	} else if (bp.helperTools.getHelperInstallionStatus()) { // bph is installed, but multiple accounts is not checked
+	} else if (bp.helperTools.getHelperInstallationStatus()) { // bph is installed, but multiple accounts is not checked
 		performThisStep(2);
 	} else { // run in "legacy" mode
 		performThisStep(3);
@@ -516,7 +516,7 @@ function finishRunningBingPong() {
 
 	bp.settings.enable();
 
-	if (bp.helperTools.getHelperInstallionStatus()) {
+	if (bp.helperTools.getHelperInstallationStatus()) {
 		if (location.href.indexOf("?runonpageload=1") != -1) {
 			// Bing Pong was told to run by Bing Pong Helper automatically, so close the window
 			chrome.runtime.sendMessage(bphExtensionID, {action: "closeBPWindow"}, function (response) {});
@@ -662,7 +662,7 @@ function generateSearchURL(doMobileSearches, callback) {
 	var searchExpression;
 
 	// use a random wiki article if BPH is installed, and a trending search term otherwise
-	if (bp.helperTools.getHelperInstallionStatus()) {
+	if (bp.helperTools.getHelperInstallationStatus()) {
 		if (dictionary && dictionary.length) { // if there are search terms remaining from the last time we got the wiki articles
 			// just use one of those to make a search
 			searchExpression = ((dictionary.pop()).split(" ")).join("+"); // replace spaces with pluses
@@ -1184,7 +1184,7 @@ function verifyDashboardTasks(callback) {
 function enableSearchOptions() {
 	document.getElementById('numberOfDesktopSearches').disabled = false;
 
-	if (bp.helperTools.getHelperInstallionStatus()) {
+	if (bp.helperTools.getHelperInstallationStatus()) {
 		document.getElementById('numberOfMobileSearches').disabled = false;
 	}
 }

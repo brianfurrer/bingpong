@@ -16,13 +16,13 @@ bp.button = (function () {
 	}
 	
 	button.markAsRunning = function () { 
-		button.setText("Stop running Bing Pong");
-		button.onClick = bp.button.stopRunning;
+		bp.button.setText("Stop running Bing Pong");
+		_buttonElement.onclick = bp.button.stopRunning;
 	}
 	
 	button.stopRunning = function () { 
-		button.setPreviousText();
-		stopRunningBingPong();
+		bp.button.setPreviousText();
+		stopRunningBingPong(); // will be defined somewhere else --- this'll probably be in a different namespace than window
 	}
 	
 	button.setPreviousText = function () { 

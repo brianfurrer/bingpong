@@ -1,13 +1,15 @@
 bp.status = (function () { 
-	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-39 (BETA)";
-	
+	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v0.21.1-42 (BETA)";
+	var STATUS_RESET_TIMEOUT = 5;
 	var _statusTimer;
 	
 	var status = {};
 	
+	status.RESET_TIMEOUT = STATUS_RESET_TIMEOUT;
+	
 	status.change = function (statusText, remainingText, extraText) {
 		// clear any old timers
-		status.clearTimer();
+		bp.status.clearTimer();
 		
 		if (statusText !== "DO_NOT_CHANGE") {
 			document.getElementById('status').innerHTML = statusText;
@@ -27,7 +29,7 @@ bp.status = (function () {
 		var updateText;
 		
 		// clear any old timers
-		staus.clearTimer();
+		bp.staus.clearTimer();
 		
 		(updateText = function () { 
 			var tempStatusText, tempRemainingText, tempExtraText;
@@ -37,16 +39,16 @@ bp.status = (function () {
 				tempStatusText = statusText.replace("(s)", "s").replace("%d", secondsLeft);
 				tempRemainingText = remainingText.replace("(s)", "s").replace("%d", secondsLeft);
 				tempExtraText = extraText.replace("(s)", "s").replace("%d", secondsLeft);
-				status.change(tempStatusText, tempRemainingText, tempExtraText);
+				bp.status.change(tempStatusText, tempRemainingText, tempExtraText);
 			} else if (secondsLeft === 1) { // 1 seconds remains
 				// so replace "%d second(s)" with "1 second"
 				tempStatusText = statusText.replace("(s)", "").replace("%d", secondsLeft);
 				tempRemainingText = remainingText.replace("(s)", "").replace("%d", secondsLeft);
 				tempExtraText = extraText.replace("(s)", "").replace("%d", secondsLeft);
-				status.change(tempStatusText, tempRemainingText, tempExtraText);
+				bp.status.change(tempStatusText, tempRemainingText, tempExtraText);
 			} else { // timer expired
-				status.clearTimer();
-				status.reset();
+				bp.status.clearTimer();
+				bp.status.reset();
 				callback();
 			}
 		})();
@@ -55,6 +57,10 @@ bp.status = (function () {
 			secondsLeft--;
 			updateText();
 		}, 1000);
+	}
+	
+	status.resetAfterTimeout = function (timeInSeconds) { 
+		bp.status.changeWithTimeout(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;", timeInSeconds, function () {});
 	}
 	
 	status.reset = function () { 
