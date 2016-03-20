@@ -171,7 +171,7 @@ bp.accountManager = (function () {
 				}
 				
 				// set the run button text
-				bp.button.setText("Run Bing Pong ( " + accountCount + (accountCount === 1 ? "account" : "accounts") + " configured)");
+				bp.button.setText("Run Bing Pong (" + accountCount + (accountCount === 1 ? " account" : " accounts") + " configured)");
 			}
 		} else { // no accounts linked
 			bp.button.setText("Run Bing Pong (0 accounts configured)");
