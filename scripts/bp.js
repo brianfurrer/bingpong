@@ -1372,33 +1372,3 @@ function changeAddAccountSection() {
 
 	updateAccountManagerDisplay();
 }
-
-function addAccountsInBulk() {
-	var fieldLines = (document.getElementById('bulkField').value).split('\n');
-
-   	for (var i = 0; i < fieldLines.length; i++) {
-		tempUsername = fieldLines[i].substring(0, fieldLines[i].indexOf(':'));
-		tempPassword = fieldLines[i].substring(fieldLines[i].indexOf(':') + 1, fieldLines[i].length);
-		var dupAccount = false;
-
-		// check for a duplicate account
-		for (var j = 1; j <= accountCount; j++) {
-			if (accountUsernames[j] == tempUsername) {
-				dupAccount = true;
-			}
-		}
-
-		if (fieldLines[i].indexOf(':') != -1 && !dupAccount) { // account is fine, so add it
-			addAccount(tempUsername, tempPassword, false, function () {});
-		} else if (fieldLines[i].indexOf(':') == -1) { // malformed line, so skip this line and all lines after it
-			bpAlert("There was a problem parsing line " + (i + 1) + " (" + fieldLines[i] + "). This line and all lines after it have not been parsed.");
-			return false;
-		} else {
-			// do nothing at this time
-		}
-	}
-}
-
-function hideAccountList() {
-   document.getElementById('accountinfo').innerHTML = "";
-}

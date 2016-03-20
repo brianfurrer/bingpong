@@ -2,7 +2,7 @@ bp.accountManager = (function () {
 	var MAX_ACCOUNTS_WITHOUT_LICENSE = 5;
 	var BAD_LOGIN_WARNING_TIMEOUT = 10;
 	var SUCCESSFUL_ADD_TIMEOUT = 5;
-	var REDEEMABLE_COLOR = "#00F00";
+	var REDEEMABLE_COLOR = "#00FF00";
 	var NOT_REDEEMABLE_COLOR = "#FAFAFA";
 	var BLOCKED_COLOR = "#FFFF00";
 	var BANNED_COLOR = "#FF0000";
@@ -73,11 +73,13 @@ bp.accountManager = (function () {
 				var username = bp.cookies.get("username" + i);
 				var password = bp.cookies.get("password" + i);
 				var creditCount = bp.cookies.get("credits" + i);
+				var isRedeemable = !bp.cookies.get("isRedeemable" + i) || (bp.cookies.get("isRedeemable" + i) === "true");
 				var isEnabled = !bp.cookies.get("isEnabled" + i) || (bp.cookies.get("isEnabled") === "true");
 				
 				// add the account to the account manager
 				var account = new bp.Account(username, password);
 				account.setCreditCount(creditCount);
+				account.setRedeemabilityStatus(isRedeemable);
 				accountManager.addAccount(account);
 
 				if (isEnabled && (i <= MAX_ACCOUNTS_WITHOUT_LICENSE || (i > MAX_ACCOUNTS_WITHOUT_LICENSE && bp.licensing.getLicenseStatus()))) { // account is enabled and can be added to the runnable list
@@ -160,10 +162,32 @@ bp.accountManager = (function () {
 					document.getElementById('accountName' + i).innerHTML = "<strike>" + username + "</strike>";
 					document.getElementById('credits' + i).innerHTML = "<strike>" + credits + "</strike>";
 				}
+				
+				// mark qualifying accounts as redeemable
+				if (isRedeemable) { 
+					accountManager.markAccountAsRedeemable(account);
+				}
 			}
 		}
 	}
 
+	function _addAccount(account) { 
+		// add account to list
+		_accounts.push(account);
+		_enabledAccounts.push(account);
+		
+		// update the cookies to reflect the new account
+		var newAccountCount = _accounts.length;
+		bp.cookies.set("username" + newAccountCount, account.getUsername());
+		bp.cookies.set("password" + newAccountCount, account.getPassword());
+		bp.cookies.set("isEnabled" + newAccountCount, true);
+		bp.cookies.set("credits" + i, account.getCreditCount());
+		bp.cookies.set("accountCount", newAccountCount);
+		
+		// update the account manager display
+		accountManager.updateDisplay(false);
+	}
+	
 	accountManager.addAccountInManager = function (account, verifyBeforeAdding) { 
 		if (verifyBeforeAdding) { 
 			bp.settings.disable(true);
@@ -194,21 +218,25 @@ bp.accountManager = (function () {
 		}
 	}
 	
-	function _addAccount(account) { 
-		// add account to list
-		_accounts.push(account);
-		_enabledAccounts.push(account);
-		
-		// update the cookies to reflect the new account
-		var newAccountCount = _accounts.length;
-		bp.cookies.set("username" + newAccountCount, account.getUsername());
-		bp.cookies.set("password" + newAccountCount, account.getPassword());
-		bp.cookies.set("isEnabled" + newAccountCount, true);
-		bp.cookies.set("credits" + i, account.getCreditCount());
-		bp.cookies.set("accountCount", newAccountCount);
-		
-		// update the account manager display
-		accountManager.updateDisplay(false);
+	accountManager.addAccountsInBulk = function () {
+		var fieldLines = (document.getElementById('bulkField').value).split('\n');
+
+		for (var i = 0; i < fieldLines.length; i++) {
+			var username = fieldLines[i].substring(0, fieldLines[i].indexOf(':'));
+			var password = fieldLines[i].substring(fieldLines[i].indexOf(':') + 1, fieldLines[i].length);
+			var account = new bp.Account(username, password);
+			
+			if (accountManager.accountIsInManager(account)) { // account is a duplicate
+				// ignore for now
+			} else {
+				if (fieldLines[i].indexOf(":") != -1) { // account is fine
+					_addAccount(account);
+				} else {
+					bpAlert("There was a problem parsing line " + (i + 1) + " (" + fieldLines[i] + "). This line and all lines after it have not been parsed.");
+					return false;
+				}
+			}
+		}
 	}
 	
 	accountManager.removeAccount = function (account) {
@@ -310,9 +338,9 @@ bp.accountManager = (function () {
 	accountManager.markAccountAsBlocked = function (acount) {
 		var index = _getAccountIndex(account);
 
-		document.getElementById('status' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
-		document.getElementById('status_ms' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
-		document.getElementById('status_dt' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_ms' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_dt' + index).innerHTML = WARNING_INDICATOR;
 		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
 		document.getElementById('credits' + index).style.color = BLOCKED_COLOR;
 		document.getElementById('accountName' + index).style.color = BLOCKED_COLOR;
@@ -322,9 +350,9 @@ bp.accountManager = (function () {
 	accountManager.markAccountAsBanned = function (account) {
 		var index = _getAccountIndex(account);
 		
-		document.getElementById('status' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
-		document.getElementById('status_ms' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
-		document.getElementById('status_dt' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_ms' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_dt' + index).innerHTML = WARNING_INDICATOR;
 		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
 		document.getElementById('credits' + index).style.color = BANNED_COLOR;
 		document.getElementById('accountName' + index).style.color = BANNED_COLOR;
@@ -334,13 +362,27 @@ bp.accountManager = (function () {
 	accountManager.markAccountAsProblematic = function (account) {
 		var index = _getAccountIndex(account);
 		
-		document.getElementById('status' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
-		document.getElementById('status_ms' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
-		document.getElementById('status_dt' + currentAccountIndex).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_ms' + index).innerHTML = WARNING_INDICATOR;
+		document.getElementById('status_dt' + index).innerHTML = WARNING_INDICATOR;
 		document.getElementById('status' + index).innerHTML = WARNING_INDICATOR;
 		document.getElementById('credits' + index).style.color = BANNED_COLOR;
 		document.getElementById('accountName' + index).style.color = BANNED_COLOR;
 		document.getElementById('credits' + index).innerHTML = "???";		
+	}
+	
+	accountManager.markAccountAsRedeemable = function (account) {
+		var index = _getAccountIndex(account);
+		
+		document.getElementById('accountName' + index).style.color = REDEEMABLE_COLOR;
+		document.getElementById('credits' + index).style.color = REDEEMABLE_COLOR;
+	}
+	
+	accountManager.markAccountAsNotRedeemable = function (account) { 
+		var index = _getAccountIndex(account);
+		
+		document.getElementById('accountName' + index).style.color = NOT_REDEEMABLE_COLOR;
+		document.getElementById('credits' + index).style.color = NOT_REDEEMABLE_COLOR;
 	}
 	
 	accountManager.onAccountCheckmarkChange = function (index) { 
@@ -434,6 +476,10 @@ bp.accountManager = (function () {
 			document.getElementById('exportAccounts').disabled = false;
 		} catch (e) {};
 	}	
+	
+	accountManager.remove = function () { 
+		document.getElementById('accountinfo').innerHTML = "";
+	}
 	
 	return accountManager;
 })();
