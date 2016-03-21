@@ -15,17 +15,6 @@ bp.button = (function () {
 		_buttonElement.value = _previousText;
 	}
 	
-	button.markAsRunning = function () { 
-		bp.button.setText("Stop running Bing Pong");
-		_buttonElement.onclick = bp.button.stopRunning;
-	}
-	
-	button.stopRunning = function () { 
-		bp.button.setPreviousText();
-		_buttonElement.onclick = runBingPong;
-		stopRunningBingPong();
-	}
-	
 	button.setPreviousText = function () { 
 		_buttonElement.value = _previousText;
 	}
