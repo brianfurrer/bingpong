@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-44 (3/20/2016)
+// Current version: 0.21.1-46 (3/20/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -120,54 +120,6 @@ function checkBrowserCompatibility(callback) {
 			callback();
 		});
 	}
-}
-
-function onGlobalCheckmarkChange() {
-	bp.cookies.set("globalCheck", document.getElementById('globalCheckmark').checked);
-
-	for (var i = 1; bp.cookies.get("check" + i); i++) {
-		if (i > 5 && !bp.licensing.getLicenseStatus()) {
-			break;
-		}
-
-		bp.cookies.set("check" + i, document.getElementById('globalCheckmark').checked);
-	}
-
-	updateAccountManagerDisplay();
-}
-
-function onAccountCheckmarksChange() {
-	// delete the old checkmark cookies
-	bp.cookies.remove("globalCheck");
-
-	for (var i = 1; bp.cookies.get("check" + i); i++) {
-		bp.cookies.remove("check" + i);
-	}
-
-	// set the checkmark cookies
-	for (var i = 1; i <= accountCount; i++) {
-		bp.cookies.set("check" + i, document.getElementById('check' + i).checked);
-	}
-
-	// set the global checkmark cookie
-	var globalCheckmarkValue = true;
-
-	for (var i = 1; bp.cookies.get("check" + i); i++) {
-		// only consider the first five accounts when there is no license
-		if (i > 5 && !bp.licensing.getLicenseStatus()) {
-			break;
-		}
-
-		if (!bp.cookies.get("check" + i) || bp.cookies.get("check" + i) === "false") {
-			globalCheckmarkValue = false;
-			break;
-		}
-	}
-
-	bp.cookies.set("globalCheck", globalCheckmarkValue);
-
-	// update the account manager display
-	updateAccountManagerDisplay();
 }
 
 function stopRunningBingPong() {

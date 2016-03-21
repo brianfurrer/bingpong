@@ -94,11 +94,11 @@ bp.accountManager = (function () {
 			}
 			
 			// update the account manager display
-			bp.accountManager.updateDisplay(false);
+			bp.accountManager.updateDisplay();
 		}
 	}
 	
-	accountManager.updateDisplay = function (disableChanges) {
+	accountManager.updateDisplay = function () {
 		document.getElementById('accountManager').innerHTML = "<table class=\"optionsTable\"><tr class=\"optionsTable\"><td class=\"optionsTable\"><!--<select disabled><option>Main account group</option></select><span style=\"float: right\">This group's last run time: <b>N/A</b></span>--></td><tr class=\"optionsTable\"><td class=\"optionsTable\"><table id=\"accountsTable\"></table></td></tr></table>";
 		
 		// get and add all accounts stored in cookies
@@ -144,7 +144,7 @@ bp.accountManager = (function () {
 				var creditsCell = row.insertCell(5);
 				var optionsCell = row.insertCell(6);
 
-				checkmarkCell.innerHTML = "<center><input type=checkbox id=\"check" + i + "\" " + (isEnabled ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"bp.accountManager.onAccountCheckmarkChange(" + i + ");\"></center>";
+				checkmarkCell.innerHTML = "<center><input type=checkbox id=\"check" + i + "\" " + (isEnabled ? "checked" : "") + " onclick=\"bp.accountManager.onAccountCheckmarkChange(" + i + ");\"></center>";
 				dsStatusCell.innerHTML = "<center><span id=\"status" + i + "\">" + BLANK_STATUS + "</span></center>";
 				msStatusCell.innerHTML = "<center><span id=\"status_ms" + i + "\">" + BLANK_STATUS + "</span></center>";
 				dtStatusCell.innerHTML = "<center><span id=\"status_dt" + i + "\">" + BLANK_STATUS + "</span></center>";
@@ -233,7 +233,7 @@ bp.accountManager = (function () {
 		bp.cookies.set("accountCount", newAccountCount);
 		
 		// update the account manager display
-		bp.accountManager.updateDisplay(false);
+		bp.accountManager.updateDisplay();
 	}
 	
 	accountManager.addAccountInManager = function (account, verifyBeforeAdding) { 
@@ -324,7 +324,7 @@ bp.accountManager = (function () {
 		bp.cookies.remove("isEnabled" + oldAccountCount);
 		
 		// update the account manager display
-		bp.accountManager.updateDisplay(false);
+		bp.accountManager.updateDisplay();
 	}
 	
 	accountManager.removeAccountAtIndex = function (index) { 
@@ -451,7 +451,7 @@ bp.accountManager = (function () {
 		document.getElementById('globalCheck').checked = _globalCheckmarkChecked;
 		
 		// update the account manager display
-		bp.accountManager.updateDisplay(false);
+		bp.accountManager.updateDisplay();
 	}
 	
 	accountManager.onGlobalCheckmarkChange = function () { 
