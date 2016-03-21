@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 0.21.1-48 (3/20/2016)
+// Current version: 0.21.1-49 (3/20/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -43,7 +43,6 @@ var minSearchDelayTime;
 var maxSearchDelayTime;
 var numberOfDesktopSearches = 35;
 var numberOfMobileSearches = 20;
-var stopRunningBingPongFlag = false; // for pausing/stopping
 
 checkBrowserCompatibility(function () {
 	// currently do nothing
@@ -122,308 +121,295 @@ function checkBrowserCompatibility(callback) {
 	}
 }
 
-function stopRunningBingPong() {
-	stopRunningBingPongFlag = true;
-	document.getElementById('runBingPongButton').disabled = true;
-	document.getElementById('runBingPongButton').value = "Stopping Bing Pong...";
-	document.getElementById('runBingPongButton').onclick = runBingPong;
-	bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Waiting for the current operation to finish...", "&nbsp;", "&nbsp;");
-}
-
-
 function performThisStep(stepNumber) {
-	if (stopRunningBingPongFlag) {
-		finishRunningBingPong();
-	} else {
-		if (stepNumber == 0) { // log-out step
-			accountsDone++;
+	if (stepNumber == 0) { // log-out step
+		accountsDone++;
 
-			// update the account manager display ONLY when initializing the first account
-			if (document.getElementById('multipleAccountsOption').checked && accountsDone == 1) {
-				updateAccountManagerDisplay();
-			}
+		// update the account manager display ONLY when initializing the first account
+		if (document.getElementById('multipleAccountsOption').checked && accountsDone == 1) {
+			updateAccountManagerDisplay();
+		}
 
-			if (document.getElementById('runInRandomOrderOption').checked) {
-				// pick a random account from the list
-				currentAccountIndex = Math.round(Math.random() * (usernamesLeftToRun.length - 1));
+		if (document.getElementById('runInRandomOrderOption').checked) {
+			// pick a random account from the list
+			currentAccountIndex = Math.round(Math.random() * (usernamesLeftToRun.length - 1));
 
-				// get the username and password corresponding to this index
-				username = usernamesLeftToRun[currentAccountIndex];
-				password = passwordsLeftToRun[currentAccountIndex];
+			// get the username and password corresponding to this index
+			username = usernamesLeftToRun[currentAccountIndex];
+			password = passwordsLeftToRun[currentAccountIndex];
 
-				// remove the account from the accounts left to run
-				usernamesLeftToRun.splice(currentAccountIndex, 1);
-				passwordsLeftToRun.splice(currentAccountIndex, 1);
+			// remove the account from the accounts left to run
+			usernamesLeftToRun.splice(currentAccountIndex, 1);
+			passwordsLeftToRun.splice(currentAccountIndex, 1);
 
-				// so that we can change the status of this account, set currentAccountIndex to be the index of the account in accountUsernames
-				currentAccountIndex = accountUsernames.indexOf(username);
-			} else { // otherwise, pick the first account and run it
-				currentAccountIndex = 0;
-				username = usernamesLeftToRun[currentAccountIndex];
-				password = passwordsLeftToRun[currentAccountIndex];
+			// so that we can change the status of this account, set currentAccountIndex to be the index of the account in accountUsernames
+			currentAccountIndex = accountUsernames.indexOf(username);
+		} else { // otherwise, pick the first account and run it
+			currentAccountIndex = 0;
+			username = usernamesLeftToRun[currentAccountIndex];
+			password = passwordsLeftToRun[currentAccountIndex];
 
-				// remove the account from the accounts left to run
-				usernamesLeftToRun.splice(currentAccountIndex, 1);
-				passwordsLeftToRun.splice(currentAccountIndex, 1);
+			// remove the account from the accounts left to run
+			usernamesLeftToRun.splice(currentAccountIndex, 1);
+			passwordsLeftToRun.splice(currentAccountIndex, 1);
 
-				// so that we can change the status of this account, set currentAccountIndex to be the index of the account in accountUsernames
-				currentAccountIndex = accountUsernames.indexOf(username);
-			}
+			// so that we can change the status of this account, set currentAccountIndex to be the index of the account in accountUsernames
+			currentAccountIndex = accountUsernames.indexOf(username);
+		}
 
-			document.getElementById('status' + currentAccountIndex).innerHTML = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
-			bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + username + "...", "&nbsp;", "&nbsp;");
+		document.getElementById('status' + currentAccountIndex).innerHTML = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
+		bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + username + "...", "&nbsp;", "&nbsp;");
 
-			logoutOfAccount(function () {
-				performThisStep(1);
-			});
-		} else if (stepNumber == 1) { // log-in step
-			// bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + username + "...", "&nbsp;", "&nbsp;");
+		logoutOfAccount(function () {
+			performThisStep(1);
+		});
+	} else if (stepNumber == 1) { // log-in step
+		// bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + username + "...", "&nbsp;", "&nbsp;");
 
-			logIntoAccount(username, password, function () { // log-in successful
-				performThisStep(2);
-			}, function () { // maximum number of log-in attempts exceeded
-				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-				document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-				document.getElementById('credits' + currentAccountIndex).innerHTML = "BAD INFO?";
+		logIntoAccount(username, password, function () { // log-in successful
+			performThisStep(2);
+		}, function () { // maximum number of log-in attempts exceeded
+			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).innerHTML = "BAD INFO?";
 
-				performThisStep(9);
-			}, function () { // account is blocked
-				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			performThisStep(9);
+		}, function () { // account is blocked
+			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+			document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
+			document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
+
+			performThisStep(9);
+		}, function () { // account is banned
+			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
+			document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
+
+			performThisStep(9);
+		}, function () { // account needs a CAPTCHA to continue
+			// GA tracking
+			ga('send', 'event', 'Bing Pong', 'Statistics', 'Dashboard CAPTCHA');
+
+			if (document.getElementById('pauseOnCaptchaOption').checked) {
+				bp.status.changeWithTimeout("A CAPTCHA has been detected on the dashboard.", "To solve it, you will be taken there in %d second(s).", "&nbsp;", CAPTCHA_MESSAGE_TIMEOUT, function () {
+					bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Opening the CAPTCHA...", "&nbsp;", "&nbsp;");
+					bp.helperTools.openDashboardForCaptcha(function () {
+						bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Waiting for the CAPTCHA to be solved...", "Click <a href=\"#\" onclick=\"openDashboardForCaptcha(function(){console.log('');});return false;\">HERE</a> to manually open it again.", "This message will disappear once you have solved the CAPTCHA.");
+						var captchaInterval = setInterval(function () {
+							getDashboardContents(function () {
+								if (dashboardData.indexOf("verify your account") == -1) {
+									closeDashboardForCaptcha(function () {
+										performThisStep(2);
+										clearInterval(captchaInterval);
+									});
+								}
+							});
+						}, 3000);
+					});
+				});
+			} else {
+				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
 				document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
 				document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
 				document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-				document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
+				document.getElementById('credits' + currentAccountIndex).innerHTML = "CAPTCHA";
 
 				performThisStep(9);
-			}, function () { // account is banned
-				document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-				document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-				document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-				document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
+			}
+		});
+	} else if (stepNumber == 2) { // get the dashboard and parse it for credit count, number of searches to do, ...
+		bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the Bing Rewards dashboard...", "&nbsp;", "&nbsp;");
 
-				performThisStep(9);
-			}, function () { // account needs a CAPTCHA to continue
-				// GA tracking
-				ga('send', 'event', 'Bing Pong', 'Statistics', 'Dashboard CAPTCHA');
+		parseDashboardContents(function () {
+			// reset the dictionary
+			dictionary = null;
 
-				if (document.getElementById('pauseOnCaptchaOption').checked) {
-					bp.status.changeWithTimeout("A CAPTCHA has been detected on the dashboard.", "To solve it, you will be taken there in %d second(s).", "&nbsp;", CAPTCHA_MESSAGE_TIMEOUT, function () {
-						bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Opening the CAPTCHA...", "&nbsp;", "&nbsp;");
-						bp.helperTools.openDashboardForCaptcha(function () {
-							bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Waiting for the CAPTCHA to be solved...", "Click <a href=\"#\" onclick=\"openDashboardForCaptcha(function(){console.log('');});return false;\">HERE</a> to manually open it again.", "This message will disappear once you have solved the CAPTCHA.");
-							var captchaInterval = setInterval(function () {
-								getDashboardContents(function () {
-									if (dashboardData.indexOf("verify your account") == -1) {
-										closeDashboardForCaptcha(function () {
-											performThisStep(2);
-											clearInterval(captchaInterval);
-										});
-									}
-								});
-							}, 3000);
-						});
-					});
-				} else {
-					document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-					document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-					// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-					document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-expeditedssl\"></i>";
-					document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-					document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
-					document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-					document.getElementById('credits' + currentAccountIndex).innerHTML = "CAPTCHA";
-
-					performThisStep(9);
-				}
-			});
-		} else if (stepNumber == 2) { // get the dashboard and parse it for credit count, number of searches to do, ...
-			bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the Bing Rewards dashboard...", "&nbsp;", "&nbsp;");
-
-			parseDashboardContents(function () {
-				// reset the dictionary
-				dictionary = null;
-
-				// check for missing searches or dashboard tasks and respond accordingly
-				getSearchCreditCount(false, true, function (desktopSearchesAreComplete, numberOfDesktopCreditsObtained) {
-					getSearchCreditCount(true, true, function (mobileSearchesAreComplete, numberOfMobileCreditsObtained) {
-						getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) {
-							// update the account manager display if necessary
-							if (document.getElementById('multipleAccountsOption').checked) {
-								if (desktopSearchesAreComplete) {
-									document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-check\"></i>";
-								}
-
-								if (mobileSearchesAreComplete) {
-									document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-check\"></i>";
-								}
-
-								if (!(numberOfTasksIncomplete > 0)) {
-									document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-check\"></i>";
-								}
+			// check for missing searches or dashboard tasks and respond accordingly
+			getSearchCreditCount(false, true, function (desktopSearchesAreComplete, numberOfDesktopCreditsObtained) {
+				getSearchCreditCount(true, true, function (mobileSearchesAreComplete, numberOfMobileCreditsObtained) {
+					getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) {
+						// update the account manager display if necessary
+						if (document.getElementById('multipleAccountsOption').checked) {
+							if (desktopSearchesAreComplete) {
+								document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-check\"></i>";
 							}
 
-							// proceed to the next incomplete item
-							if (!desktopSearchesAreComplete) {
-								performThisStep(4);
-							} else if (!mobileSearchesAreComplete) {
-								performThisStep(5);
-							} else if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) {
-								performThisStep(7);
-							} else { // everything is done
-								performThisStep(9);
+							if (mobileSearchesAreComplete) {
+								document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-check\"></i>";
 							}
-						});
+
+							if (!(numberOfTasksIncomplete > 0)) {
+								document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-check\"></i>";
+							}
+						}
+
+						// proceed to the next incomplete item
+						if (!desktopSearchesAreComplete) {
+							performThisStep(4);
+						} else if (!mobileSearchesAreComplete) {
+							performThisStep(5);
+						} else if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) {
+							performThisStep(7);
+						} else { // everything is done
+							performThisStep(9);
+						}
 					});
 				});
-			}, function () {
-				performThisStep(9);
 			});
-		} else if (stepNumber == 3) { // download a word list to search with
-			bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the trending search terms...", "&nbsp;", "&nbsp;");
+		}, function () {
+			performThisStep(9);
+		});
+	} else if (stepNumber == 3) { // download a word list to search with
+		bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the trending search terms...", "&nbsp;", "&nbsp;");
 
-			parseTrendingSearchTerms(function () {
-				performThisStep(4);
-			});
-		} else if (stepNumber == 4) { // perform PC searches
-			bp.status.change("DO_NOT_CHANGE", "&nbsp;", "DO_NOT_CHANGE");
+		parseTrendingSearchTerms(function () {
+			performThisStep(4);
+		});
+	} else if (stepNumber == 4) { // perform PC searches
+		bp.status.change("DO_NOT_CHANGE", "&nbsp;", "DO_NOT_CHANGE");
 
-			if (bp.helperTools.getHelperInstallationStatus()) {
-				// GA tracking
-				ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', regularSearchesToPerform);
+		if (bp.helperTools.getHelperInstallationStatus()) {
+			// GA tracking
+			ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', regularSearchesToPerform);
 
-				bp.helperTools.openSearchWindow(function () {
-					// since BPH is installed, we can check for the number of search credits that are missing (and we can use cached dashboard data)
-					getSearchCreditCount(false, true, function (desktopSearchesAreComplete, numberOfDesktopCreditsObtained) {
-						performSearchesBPH(regularSearchesToPerform - numberOfDesktopCreditsObtained*numberOfSearchesPerCredit, false, function () {
-							// again, we can use cached dashboard data. check for missing mobile search and dashboard task credits
-							getSearchCreditCount(true, true, function (mobileSearchesAreComplete, numberOfMobileCreditsObtained) {
-								getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) {
-									if (!mobileSearchesAreComplete) {
-										performThisStep(5);
-									} else if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) {
-										performThisStep(7);
-									} else { // everything is done
-										performThisStep(9);
-									}
-								});
+			bp.helperTools.openSearchWindow(function () {
+				// since BPH is installed, we can check for the number of search credits that are missing (and we can use cached dashboard data)
+				getSearchCreditCount(false, true, function (desktopSearchesAreComplete, numberOfDesktopCreditsObtained) {
+					performSearchesBPH(regularSearchesToPerform - numberOfDesktopCreditsObtained*numberOfSearchesPerCredit, false, function () {
+						// again, we can use cached dashboard data. check for missing mobile search and dashboard task credits
+						getSearchCreditCount(true, true, function (mobileSearchesAreComplete, numberOfMobileCreditsObtained) {
+							getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) {
+								if (!mobileSearchesAreComplete) {
+									performThisStep(5);
+								} else if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) {
+									performThisStep(7);
+								} else { // everything is done
+									performThisStep(9);
+								}
 							});
 						});
 					});
 				});
-			} else {
-				// GA tracking
-				ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', numberOfDesktopSearches);
-
-				performSearchesLegacy(numberOfDesktopSearches, function () {
-					finishRunningBingPong();
-				});
-			}
-		} else if (stepNumber == 5) { // perform mobile searches
-			bp.status.change("DO_NOT_CHANGE", "&nbsp;", "DO_NOT_CHANGE");
-
-			// update the account status if needed (as mobile searches and multiple accounts will be separated later)
-			if (document.getElementById('multipleAccountsOption').checked) {
-				document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
-			}
-
+			});
+		} else {
 			// GA tracking
-			ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', mobileSearchesToPerform);
+			ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', numberOfDesktopSearches);
 
-			bp.helperTools.openSearchWindow(function () {
-				bp.helperTools.enableMobileMode(function () {
-					getSearchCreditCount(true, true, function (mobileSearchesAreComplete, numberOfMobileCreditsObtained) {
-						performSearchesBPH(mobileSearchesToPerform - 2*numberOfMobileCreditsObtained, true, function () {
-							if (false) { // do trivia when done if the option is checked (placeholder code)
-								performThisStep(6);
-							} else if (document.getElementById('dashboardTasksOption').checked) { // if not, do the dashboard tasks if needed
-								if (document.getElementById('multipleAccountsOption').checked) {
-									// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
-								}
+			performSearchesLegacy(numberOfDesktopSearches, function () {
+				finishRunningBingPong();
+			});
+		}
+	} else if (stepNumber == 5) { // perform mobile searches
+		bp.status.change("DO_NOT_CHANGE", "&nbsp;", "DO_NOT_CHANGE");
 
-								getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) {
-									if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) {
-										performThisStep(7);
-									} else {
-										performThisStep(9);
-									}
-								});
-							} else { // otherwise, move to step 9
-								if (document.getElementById('multipleAccountsOption').checked) {
-									document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
-									// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
-								}
+		// update the account status if needed (as mobile searches and multiple accounts will be separated later)
+		if (document.getElementById('multipleAccountsOption').checked) {
+			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
+		}
 
-								performThisStep(9);
+		// GA tracking
+		ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', mobileSearchesToPerform);
+
+		bp.helperTools.openSearchWindow(function () {
+			bp.helperTools.enableMobileMode(function () {
+				getSearchCreditCount(true, true, function (mobileSearchesAreComplete, numberOfMobileCreditsObtained) {
+					performSearchesBPH(mobileSearchesToPerform - 2*numberOfMobileCreditsObtained, true, function () {
+						if (false) { // do trivia when done if the option is checked (placeholder code)
+							performThisStep(6);
+						} else if (document.getElementById('dashboardTasksOption').checked) { // if not, do the dashboard tasks if needed
+							if (document.getElementById('multipleAccountsOption').checked) {
+								// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
 							}
-						});
+
+							getNumberOfMissingDashboardTasks(false, true, function (numberOfTasksIncomplete) {
+								if (numberOfTasksIncomplete > 0 && document.getElementById('dashboardTasksOption').checked) {
+									performThisStep(7);
+								} else {
+									performThisStep(9);
+								}
+							});
+						} else { // otherwise, move to step 9
+							if (document.getElementById('multipleAccountsOption').checked) {
+								document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
+								// document.getElementById('status_tq' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
+							}
+
+							performThisStep(9);
+						}
 					});
 				});
 			});
-		} else if (stepNumber == 6) { // do the trivia
-			// to-do
+		});
+	} else if (stepNumber == 6) { // do the trivia
+		// to-do
 
-			if (document.getElementById('dashboardTasksOption').checked) { // do dashboard tasks when done if the option is checked
-				performThisStep(7);
-			} else { // otherwise, move to step 9
-				if (document.getElementById('multipleAccountsOption').checked) {
-					document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
-				}
-
-				performThisStep(9);
-			}
-		} else if (stepNumber == 7) { // get the list of dashboard tasks
-			bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the dashboard task list...", "&nbsp;", "&nbsp;");
-
-			// update the account status if needed
+		if (document.getElementById('dashboardTasksOption').checked) { // do dashboard tasks when done if the option is checked
+			performThisStep(7);
+		} else { // otherwise, move to step 9
 			if (document.getElementById('multipleAccountsOption').checked) {
-				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
+				document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-minus\"></i>";
 			}
 
-			parseDashboardForTasks(function () {
-				performThisStep(8);
-			});
-		} else if (stepNumber == 8) { // perform the dasboard tasks
-			performDashboardTasks(function () {
-				performThisStep(9);
-			});
-		} else if (stepNumber == 9) { // account/run finished
-			if (accountsDone == accountsToRun || !document.getElementById('multipleAccountsOption').checked) { // finished
-				finishRunningBingPong();
-			} else { // accounts remain, so continue
-				var proceed = function () {
-					if (document.getElementById('waitForIPChangeOption').checked && accountsDone % (document.getElementById('accountsPerIP').selectedIndex + 1) == 0) { // wait for an IP change if needed
-						bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Waiting for an IP change...", "&nbsp;", "&nbsp;");
-						waitForAnIPChange();
-					} else { // move to the next account
-						performThisStep(0);
-					}
-				};
-
-				if (accountsDone >= 5) { // if 5 or more accounts have completed, check for a license before proceeding
-					if (bp.licensing.getLicenseStatus()) { // is licensed, so proceed
-						proceed();
-					} else { // not licensed, so finish running Bing Pong
-						finishRunningBingPong();
-					}
-				} else { // otherwise, just proceed
-					proceed();
-				}
-			}
-		} else {
-			// more to come
+			performThisStep(9);
 		}
+	} else if (stepNumber == 7) { // get the list of dashboard tasks
+		bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Fetching the dashboard task list...", "&nbsp;", "&nbsp;");
+
+		// update the account status if needed
+		if (document.getElementById('multipleAccountsOption').checked) {
+			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<img src=\"loader.gif\" width=\"10\" height=\"10\"></img>";
+		}
+
+		parseDashboardForTasks(function () {
+			performThisStep(8);
+		});
+	} else if (stepNumber == 8) { // perform the dasboard tasks
+		performDashboardTasks(function () {
+			performThisStep(9);
+		});
+	} else if (stepNumber == 9) { // account/run finished
+		if (accountsDone == accountsToRun || !document.getElementById('multipleAccountsOption').checked) { // finished
+			finishRunningBingPong();
+		} else { // accounts remain, so continue
+			var proceed = function () {
+				if (document.getElementById('waitForIPChangeOption').checked && accountsDone % (document.getElementById('accountsPerIP').selectedIndex + 1) == 0) { // wait for an IP change if needed
+					bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Waiting for an IP change...", "&nbsp;", "&nbsp;");
+					waitForAnIPChange();
+				} else { // move to the next account
+					performThisStep(0);
+				}
+			};
+
+			if (accountsDone >= 5) { // if 5 or more accounts have completed, check for a license before proceeding
+				if (bp.licensing.getLicenseStatus()) { // is licensed, so proceed
+					proceed();
+				} else { // not licensed, so finish running Bing Pong
+					finishRunningBingPong();
+				}
+			} else { // otherwise, just proceed
+				proceed();
+			}
+		}
+	} else {
+		// more to come
 	}
 }
 
@@ -431,10 +417,6 @@ function runBingPong() {
 	bp.status.clearTimer();
 	disableSearchOptions();
 	bp.settings.disable(false);
-
-	// change the "run Bing Pong" button into a stop buton
-	document.getElementById('runBingPongButton').value = "Stop running Bing Pong";
-	document.getElementById('runBingPongButton').onclick = stopRunningBingPong;
 
 	if (document.getElementById('multipleAccountsOption').checked) {
 		// prime the usernames/passwordsLeftToRun arrays
@@ -482,23 +464,8 @@ function finishRunningBingPong() {
 	} else {
 		document.getElementById('runBingPongButton').value = "Run Bing Pong (" + numberOfDesktopSearches + " searches)";
 	}
-
-	// reset the run button onclick since it was changed to a stop button
-	document.getElementById('runBingPongButton').onclick = runBingPong;
-
-	if (stopRunningBingPongFlag) { // Bing Pong was stopped in the middle of a run
-		bp.status.reset();
-
-		// update the account manager display if possible
-		if (document.getElementById('multipleAccountsOption').checked) {
-			updateAccountManagerDisplay();
-		}
-
-		// reset the flag so that the next run will not be impeded
-		stopRunningBingPongFlag = false;
-	} else {
-		bp.status.changeTextWithDefaultTimeout("Done. <a href=\"http://www.bing.com/rewards/dashboard\" target=\"_blank\">Launch the Bing Rewards dashboard?</a>", "DO_NOT_CHANGE", "DO_NOT_CHANGE", 20000);
-	}
+	
+	bp.status.changeTextWithDefaultTimeout("Done. <a href=\"http://www.bing.com/rewards/dashboard\" target=\"_blank\">Launch the Bing Rewards dashboard?</a>", "DO_NOT_CHANGE", "DO_NOT_CHANGE", 20000);
 }
 
 function parseTrendingSearchTerms(callback) {
@@ -672,17 +639,8 @@ function handleSearchCaptcha(numberOfSearches, doMobileSearches, callback) {
 						clearInterval(captchaInterval);
 
 						bp.helperTools.moveSearchCaptchaBack(function () {
-							if (stopRunningBingPongFlag) {
-								// we need to call performThisStep() again to get Bing Pong to stop
-								bp.helperTools.disableMobileMode(function () {
-									bp.helperTools.closeSearchWindow(function () {
-										performThisStep(0);
-									});
-								});
-							} else {
-								bp.status.change("DO_NOT_CHANGE", "&nbsp;", "&nbsp;");
-								performSearchesBPH(numberOfSearches, doMobileSearches, callback);
-							}
+							bp.status.change("DO_NOT_CHANGE", "&nbsp;", "&nbsp;");
+							performSearchesBPH(numberOfSearches, doMobileSearches, callback);
 						});
 					}
 				});
@@ -707,14 +665,7 @@ function performSearchesBPH(numberOfSearches, doMobileSearches, callback) {
 
 				var checkForCaptcha = function () {
 					bp.helperTools.checkForSearchCaptcha(function (tabIsDead, captchaDetected) {
-						if (stopRunningBingPongFlag) {
-							// we need to call performThisStep() again to get Bing Pong to stop
-							bp.helperTools.disableMobileMode(function () {
-								bp.helperTools.closeSearchWindow(function () {
-									performThisStep(0);
-								});
-							});
-						} else if (tabIsDead) {
+						if (tabIsDead) {
 							continueSearching();
 						} else if (captchaDetected) { // search captcha detected
 							handleSearchCaptcha(numberOfSearches, doMobileSearches, callback);
@@ -804,10 +755,7 @@ function performSearchesLegacy(numberOfSearches, callback) {
 		// the redirection service causes the iframe to load twice per search, so we need to consider a search done only after the onload fires twice
 		document.getElementById('searchFrame').onload = function () {
 			setTimeout(function () {
-				if (stopRunningBingPongFlag) {
-					// we need to call performThisStep() again to get Bing Pong to stop
-					performThisStep(0);
-				} else if (searchOccurred) {
+				if (searchOccurred) {
 					numberOfSearches--;
 					searchOccurred = false;
 
@@ -909,19 +857,10 @@ function verifySearches(doMobileSearches, callback) {
 	 			searchAttemptCount++;
 
 	 			bp.helperTools.enableMobileMode(function () {
-	 				if (stopRunningBingPongFlag) {
-	 					// we need to call performThisStep() again to get Bing Pong to stop
-	 					bp.helperTools.disableMobileMode(function () {
-	 						bp.helperTools.closeSearchWindow(function () {
-	 							performThisStep(0);
-	 						});
-	 					});
-	 				} else {
-	 					// GA tracking
-						ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', 20 - 2*numberOfNewCredits);
+					// GA tracking
+					ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', 20 - 2*numberOfNewCredits);
 
-		 				performSearchesBPH(20 - 2*numberOfNewCredits, true, callback);
-		 			}
+					performSearchesBPH(20 - 2*numberOfNewCredits, true, callback);
 	 			});
 	 		} else { // mobile searches are complete
 	 			// if applicable, update the account status
@@ -940,17 +879,10 @@ function verifySearches(doMobileSearches, callback) {
 	 		if (!searchesAreComplete) { // PC searches are incomplete
 	 			searchAttemptCount++;
 
-	 			if (stopRunningBingPongFlag) {
-	 				// we need to call performThisStep() again to get Bing Pong to stop
-	 				bp.helperTools.closeSearchWindow(function () {
-	 					performThisStep(0);
-	 				});
-	 			} else {
-	 				// GA tracking
-					ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', numberOfSearchesPerCredit*(creditsToGet - numberOfNewCredits));
+				// GA tracking
+				ga('send', 'event', 'Bing Pong', 'Statistics', 'Searches done', numberOfSearchesPerCredit*(creditsToGet - numberOfNewCredits));
 
-		 			performSearchesBPH(numberOfSearchesPerCredit*(creditsToGet - numberOfNewCredits), false, callback);
-		 		}
+				performSearchesBPH(numberOfSearchesPerCredit*(creditsToGet - numberOfNewCredits), false, callback);
 	 		} else { // PC searches are complete
 				// if applicable, update the account status
 				if (document.getElementById('multipleAccountsOption').checked) {
@@ -1036,12 +968,7 @@ function performDashboardTasks(callback) {
 
 	// request Bing Pong Helper to open the tasks in new tabs, and return to caller when finished
 	chrome.runtime.sendMessage(bphExtensionID, {action: "performTasks", taskList: dashboardTaskURLs}, function () {
-		if (stopRunningBingPongFlag) {
-			// we need to call performThisStep() again to get Bing Pong to stop
-			performThisStep(0);
-		} else {
-			verifyDashboardTasks(callback);
-		}
+		verifyDashboardTasks(callback);
 	});
 }
 
@@ -1049,39 +976,34 @@ function waitForAnIPChange() {
 	document.getElementById('remaining').innerHTML = "Current IP: <span id='ipLoader'></span><span id='ipText'></span>";
 
 	var fetchNewIPs = function () {
-		if (stopRunningBingPongFlag) {
-			// we need to call performThisStep() again to get Bing Pong to stop
-			performThisStep(0);
-		} else {
-			document.getElementById('ipLoader').innerHTML = "<i class=\"fa fa-refresh fa-spin\"></i>";
+		document.getElementById('ipLoader').innerHTML = "<i class=\"fa fa-refresh fa-spin\"></i>";
 
-			performGETRequest("http://ip-api.com/json/?fields=8193", true, function (contents) {
-				if (!initialIP && contents.query) { // set the initial IP and poll for new IPs
-					initialIP = contents.query;
-					document.getElementById('ipText').innerHTML = initialIP;
+		performGETRequest("http://ip-api.com/json/?fields=8193", true, function (contents) {
+			if (!initialIP && contents.query) { // set the initial IP and poll for new IPs
+				initialIP = contents.query;
+				document.getElementById('ipText').innerHTML = initialIP;
+				document.getElementById('ipLoader').innerHTML = "<img src=\"blue10.png\" width=\"11\" height=\"11\"></img>";
+				setTimeout(fetchNewIPs, 5000);
+			} else {
+				if (!contents.query) {
+					setTimeout(fetchNewIPs, 5000);
+				} else if (contents.query != initialIP && contents.country == "United States") { // IP has changed and is from the US, so continue
+					initialIP = 0;
+					document.getElementById('ipLoader').innerHTML = "<i class=\"fa fa-check\"></i>";
+					document.getElementById('ipText').innerHTML = contents.query;
+					setTimeout(function () {
+						performThisStep(0);
+					}, 1000);
+				} else if (contents.country != "United States") { // non-US IP, so warn user and poll for new IPs
 					document.getElementById('ipLoader').innerHTML = "<img src=\"blue10.png\" width=\"11\" height=\"11\"></img>";
+					document.getElementById('ipText').innerHTML = "<font color='red'>" + contents.query + '</font>'
+					document.getElementById('extra').innerHTML = "(Your IP is not from the United States. Bing Pong will not continue until it gets a US-based IP.)";
 					setTimeout(fetchNewIPs, 5000);
 				} else {
-					if (!contents.query) {
-						setTimeout(fetchNewIPs, 5000);
-					} else if (contents.query != initialIP && contents.country == "United States") { // IP has changed and is from the US, so continue
-						initialIP = 0;
-						document.getElementById('ipLoader').innerHTML = "<i class=\"fa fa-check\"></i>";
-						document.getElementById('ipText').innerHTML = contents.query;
-						setTimeout(function () {
-							performThisStep(0);
-						}, 1000);
-					} else if (contents.country != "United States") { // non-US IP, so warn user and poll for new IPs
-						document.getElementById('ipLoader').innerHTML = "<img src=\"blue10.png\" width=\"11\" height=\"11\"></img>";
-						document.getElementById('ipText').innerHTML = "<font color='red'>" + contents.query + '</font>'
-						document.getElementById('extra').innerHTML = "(Your IP is not from the United States. Bing Pong will not continue until it gets a US-based IP.)";
-						setTimeout(fetchNewIPs, 5000);
-					} else {
-						setTimeout(fetchNewIPs, 5000);
-					}
+					setTimeout(fetchNewIPs, 5000);
 				}
-			});
-		}
+			}
+		});
 	}
 
 	fetchNewIPs();
@@ -1115,12 +1037,7 @@ function verifyDashboardTasks(callback) {
 		}
 
 		if (numberOfTasksIncomplete > 0) { // tasks failed
-			if (stopRunningBingPongFlag) {
-				// we need to call performThisStep() again to get Bing Pong to stop
-				performThisStep(0);
-			} else {
-				performDashboardTasks(callback);
-			}
+			performDashboardTasks(callback);
 		} else { // tasks successfully completed
 			// update the account status if needed
 			if (document.getElementById('multipleAccountsOption').checked) {
