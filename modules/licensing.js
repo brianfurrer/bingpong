@@ -4,7 +4,7 @@ bp.licensing = (function () {
 	
 	var _isLicensed = NOT_CHECKED;
 	
-	var licensing;
+	var licensing = {};
 	
 	licensing.MAX_ACCOUNTS_WITHOUT_LICENSE = MAX_ACCOUNTS_WITHOUT_LICENSE;
 	

@@ -34,11 +34,13 @@ bp.helperTools = (function () {
 	helperTools.updateHelperInstallationStatus = function (callback) { 
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "testBPH"}, function (response) {
 			if (response !== undefined) { // bph is installed
+				_installedHelperVersion = response.bphVersion;
+				_helperIsInstalled = true;
 				callback(true);
-				_installedVersion = response.bphVersion;
 			} else {
+				_installedHelperVersion = null;
+				_helperIsInstalled = false;
 				callback(false);
-				_installedVersion = null;
 			}
 		});
 	}
@@ -92,7 +94,7 @@ bp.helperTools = (function () {
 		});
 	}
 
-	function disableMobileMode = function (callback) {
+	helperTools.disableMobileMode = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "disableMobileMode"}, function (response) {
 			callback();
 		});
@@ -104,7 +106,7 @@ bp.helperTools = (function () {
 		});
 	}
 
-	helperTools.openBPHOptions() {
+	helperTools.openBPHOptions = function () {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openBPHOptions"}, function (response) {
 			// do nothing
 		});
@@ -132,7 +134,7 @@ bp.helperTools = (function () {
 		});
 	}
 
-	helperTools.performGETRequest(ajaxURL, responseIsJSON, callback) {
+	helperTools.performGETRequest = function (ajaxURL, responseIsJSON, callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "performGETRequest", ajaxURL: ajaxURL, responseIsJSON: responseIsJSON}, function (response) {
 			try {
 				callback(response);
@@ -152,7 +154,7 @@ bp.helperTools = (function () {
 		});
 	}
 
-	helperTools.logIntoAccount(username, password, callback) {
+	helperTools.logIntoAccount = function (username, password, callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logIntoAccount", username: username, password: password}, function (response) {
 			callback();
 		});
@@ -162,6 +164,7 @@ bp.helperTools = (function () {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "logoutOfAccount"}, function (response) {
 			callback();
 		});
+	}
 
 	helperTools.openDashboardForVerifying = function (callback) {
 		chrome.runtime.sendMessage(_bphExtensionID, {action: "openDashboardForVerifying"}, function (response) {
