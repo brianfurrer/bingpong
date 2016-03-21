@@ -479,10 +479,10 @@ bp.accountManager = (function () {
 		document.getElementById('managerSection2').disabled = true;
 		document.getElementById('managerSection3').disabled = true;
 
-		// enable the global checkbox in the accounts list
+		// disable the global checkbox in the accounts list
 		document.getElementById('globalCheckmark').disabled = true;
 		
-		// enable the checkbox for each account 
+		// disable the checkbox for each account 
 		for (var i = 1, l = _accounts.length; i <= l; i++) { 
 			document.getElementById('check' + i).disabled = true;
 		}

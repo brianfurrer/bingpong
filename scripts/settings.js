@@ -12,7 +12,7 @@ bp.settings = (function () {
 			} else {
 				document.getElementById('numberOfDesktopSearches').value = bp.cookies.get("numberOfDesktopSearches");
 				numberOfDesktopSearches = bp.cookies.get("numberOfDesktopSearches");
-				document.getElementById('runBingPongButton').value = "Run Bing Pong (" + numberOfDesktopSearches + " searches)";
+				bp.button.setText("Run Bing Pong (" + numberOfDesktopSearches + " searches)");
 			}
 		}
 
@@ -59,12 +59,8 @@ bp.settings = (function () {
 				document.getElementById('multipleAccountsOption').checked = true;
 				document.getElementById('runInRandomOrderOption').disabled = false;
 				document.getElementById('pauseOnCaptchaOption').disabled = false;
-
-				if (bp.licensing.getLicenseStatus() || true) {
-					document.getElementById('waitForIPChangeOption').disabled = false;
-					// document.getElementById('pauseOnCaptchaOption').disabled = false;
-				}
-
+				document.getElementById('waitForIPChangeOption').disabled = false;
+				
 				bp.accountManager.updateDisplay();
 			}
 
@@ -132,9 +128,6 @@ bp.settings = (function () {
 	}
 	
 	settings.onChange = function () { 
-		// clear any status timeout
-		clearStatusTimeout();
-
 		// check for invalid input in the min/max wait time and number of searches boxes, and disable the "Run Bing Pong" button if errors are found
 		if (isNaN(parseFloat(document.getElementById('minSearchDelayTime').value)) ||
 		isNaN(parseFloat(document.getElementById('maxSearchDelayTime').value)) ||
@@ -160,21 +153,18 @@ bp.settings = (function () {
 		}
 
 		if (document.getElementById('multipleAccountsOption').checked) {
-			updateAccountManagerDisplay();
+			bp.accountManager.updateDisplay();
 
 			document.getElementById('runInRandomOrderOption').disabled = false;
-
-			if (bp.licensing.getLicenseStatus() || true) {
-				document.getElementById('waitForIPChangeOption').disabled = false;
-			}
+			document.getElementById('waitForIPChangeOption').disabled = false;
 		} else {
-			hideAccountManagerDisplay();
+			bp.accountManager.remove();
 			document.getElementById('waitForIPChangeOption').disabled = true;
 			document.getElementById('waitForIPChangeOption').checked = false;
 			document.getElementById('accountsPerIP').disabled = true;
 			document.getElementById('runInRandomOrderOption').disabled = true;
 			document.getElementById('runInRandomOrderOption').checked = false;
-			document.getElementById('runBingPongButton').value = "Run Bing Pong (" + numberOfDesktopSearches + " searches)";
+			bp.button.setText("Run Bing Pong (" + numberOfDesktopSearches + " searches)");
 		}
 
 		if (document.getElementById('waitForIPChangeOption').checked) {

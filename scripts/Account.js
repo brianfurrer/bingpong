@@ -91,7 +91,7 @@ bp.Account = function (user, pass) {
 		bp.rewardsDashboard.updateDashboardData(function () {
 			var dashboardData = bp.rewardsDashboard.getDashboardData();
 
-			if (dashboardDataccount.indexOf("To see your order history, sign in.") != -1 || dashboardDataccount.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
+			if (dashboardData.indexOf("To see your order history, sign in.") != -1 || dashboardData.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
 				// check to see if the account is just blocked
 				bp.helperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
 					if (contents.indexOf("/proofs/Verify") != -1 || contents.indexOf("/ar/cancel") != -1 || contents.indexOf("tou/accrue") != -1) { // we are actually logged in, but the account is blocked
@@ -102,11 +102,11 @@ bp.Account = function (user, pass) {
 						}, callbackOnFailure);
 					}
 				});
-			} else if (dashboardDataccount.indexOf("/proofs/Verify") != -1 || dashboardDataccount.indexOf("/ar/cancel") != -1 || dashboardDataccount.indexOf("tou/accrue") != -1) { // account is blocked
+			} else if (dashboardData.indexOf("/proofs/Verify") != -1 || dashboardData.indexOf("/ar/cancel") != -1 || dashboardData.indexOf("tou/accrue") != -1) { // account is blocked
 				callbackOnBlocked();
-			} else if (dashboardDataccount.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
+			} else if (dashboardData.indexOf("Bing Rewards account has been suspended") != -1) { // account is banned
 				callbackOnBanned();
-			} else if (dashboardDataccount.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
+			} else if (dashboardData.indexOf("Verify account") != -1) { // logged in, but solving a CAPTCHA is required to do anything useful
 				callbackOnCaptcha();
 			} else { // all good, so continue
 				callbackOnSuccess();
@@ -146,7 +146,6 @@ bp.Account = function (user, pass) {
 	
 	account.launchDashboard = function () {
 		bp.settings.disable();
-		bp.status.resetAfterTimeout(bp.status.RESET_TIMEOUT);
 		bp.status.changeText("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Signing in as " + accountUsernames[accountIndex] + "...", "&nbsp;", "&nbsp;");
 
 		_logOut(function () {
@@ -187,7 +186,7 @@ bp.Account = function (user, pass) {
 
 		_logOut(function () {
 			_logIn(function () { // log-in was successful, so open the dashboard
-				bp.helperTools.openDashboard(function () {
+				bp.helperTools.openEmail(function () {
 					bp.settings.enable();
 					bp.status.reset();
 				});
@@ -206,8 +205,7 @@ bp.Account = function (user, pass) {
 			}, function () { // account needs to solve a CAPTCHA before being able to get credits, which is okay
 				bp.helperTools.openEmail(function () {
 					bp.settings.enable();
-					bp.status.restoreDefault();
-					// changeStatusText(DEFAULT_STATUS_TEXT, "&nbsp;", "&nbsp;");
+					bp.status.reset();
 				});
 			});
 		}, function () { // log-out failed
