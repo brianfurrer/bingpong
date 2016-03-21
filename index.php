@@ -163,15 +163,6 @@
 							</select> account(s)
 						</td>
 					</tr>
-					<!-- "Automatically run Bing Pong on each visit" option -->
-					<tr>
-						<td class="optionsTable">
-							<input type=checkbox id="runOnPageLoadOption" onclick="onSettingsChange();" disabled>
-						</td>
-						<td class="optionsTable">
-							Automatically run Bing Pong on each visit
-						</td>
-					</tr>
 				</table>
 				<input type=button value="Bing Pong Helper options" onclick="openBPHOptions();" id="bphOptionsButton" disabled>
 				<br>

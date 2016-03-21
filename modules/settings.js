@@ -81,17 +81,8 @@ bp.settings = (function () {
 				document.getElementById('runInRandomOrderOption').checked = true;
 			}
 
-			if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
-				document.getElementById('runOnPageLoadOption').checked = true;
-			}
-
-			if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED" || location.href.indexOf("?runonpageload=1") != -1) {
+			if (location.href.indexOf("?runonpageload=1") !== -1) {
 				setTimeout(runBingPong, RUN_ON_PAGE_LOAD_TIMEOUT);
-			}
-		} else {
-			if (bp.cookies.get("runOnPageLoad") === "RUN_ON_PAGE_LOAD.ENABLED") {
-				document.getElementById('runOnPageLoadOption').checked = true;
-				runBingPong();
 			}
 		}
 		
@@ -103,7 +94,6 @@ bp.settings = (function () {
 		bp.cookies.set("doDashboardTasks", (document.getElementById('dashboardTasksOption').checked ? "DASHBOARD_TASKS.ENABLED" : "DASHBOARD_TASKS.DISABLED"));
 		bp.cookies.set("pauseOnCaptcha", (document.getElementById('pauseOnCaptchaOption').checked ? "PAUSE_ON_CAPTCHA.ENABLED" : "PAUSE_ON_CAPTCHA.DISABLED"));
 		bp.cookies.set("useSearchDelay", (document.getElementById('useSearchDelayOption').checked ? "SEARCH_DELAY.ENABLED" : "SEARCH_DELAY.DISABLED"));
-		bp.cookies.set("runOnPageLoad", (document.getElementById('runOnPageLoadOption').checked ? "RUN_ON_PAGE_LOAD.ENABLED" : "RUN_ON_PAGE_LOAD.DISABLED"));
 		bp.cookies.set("waitForIPChange", (document.getElementById('waitForIPChangeOption').checked ? "WAIT_FOR_IP_CHANGE.ENABLED" : "WAIT_FOR_IP_CHANGE.DISABLED"));
 		bp.cookies.set("accountsPerIP", document.getElementById('accountsPerIP').selectedIndex);
 		bp.cookies.set("runInRandomOrder", (document.getElementById('runInRandomOrderOption').checked ? "RUN_IN_RANDOM_ORDER.ENABLED" : "RUN_IN_RANDOM_ORDER.DISABLED"));
@@ -180,7 +170,6 @@ bp.settings = (function () {
 	settings.enable = function () { 
 		document.getElementById('runBingPongButton').disabled = false;
 		document.getElementById('useSearchDelayOption').disabled = false;
-		document.getElementById('runOnPageLoadOption').disabled = false;
 
 		if (document.getElementById('useSearchDelayOption').checked) {
 			document.getElementById('minSearchDelayTime').disabled = false;
@@ -215,7 +204,6 @@ bp.settings = (function () {
 		document.getElementById('numberOfDesktopSearches').disabled = true;
 		document.getElementById('numberOfMobileSearches').disabled = true;
 		document.getElementById('useSearchDelayOption').disabled = true;
-		document.getElementById('runOnPageLoadOption').disabled = true;
 		document.getElementById('minSearchDelayTime').disabled = true;
 		document.getElementById('maxSearchDelayTime').disabled = true;
 		document.getElementById('multipleAccountsOption').disabled = true;
