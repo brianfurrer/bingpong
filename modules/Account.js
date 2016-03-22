@@ -88,9 +88,7 @@ bp.Account = function (user, pass) {
 	}		
 
 	function _checkForSuccessfulLogin(callbackOnSuccess, callbackOnFailure, callbackOnBlocked, callbackOnBanned, callbackOnCaptcha) {
-		bp.rewardsDashboard.updateDashboardData(function () {
-			var dashboardData = bp.rewardsDashboard.getDashboardData();
-
+		bp.rewardsDashboard.updateDashboardData(function (dashboardData) {
 			if (dashboardData.indexOf("To see your order history, sign in.") != -1 || dashboardData.indexOf("You are not signed in to Bing Rewards.") != -1) { // the dashboard says we are still logged out
 				// check to see if the account is just blocked
 				bp.helperTools.performGETRequest("https://login.live.com/login.srf?wa=wsignin1.0&wreply=http:%2F%2Fwww.bing.com%2FPassport.aspx%3Frequrl%3Dhttp%253a%252f%252fwww.bing.com%252frewards%252fdashboard", false, function (contents) {
