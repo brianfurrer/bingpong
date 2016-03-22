@@ -64,13 +64,17 @@ bp.rewardsDashboard = (function () {
 		var tasks = _dashboardData.split("rewardsapp/redirect?url=");
 		
 		// remove the first element of the above array since it doesn't contain any task info
-		tasks = task.splice(0, 1);
+		tasks.splice(0, 1);
 		
-		// update the urls
+		// update the task URLs
 		for (var i = 0, l = tasks.length; i < l; i++) {
 			var tempTask = tasks[i];
-			tasks[i] = "https://www.bing.com/rewardsapp/redirect?url=" + tempTask.substring(0, tempTask.indexOf("\" id=\"")).replace(/&amp;/g, "");
+			tasks[i] = "https://www.bing.com/rewardsapp/redirect?url=" + tempTask.substring(0, tempTask.indexOf("\" id=\"")).replace(/&amp;/g, "&");
 		}
+		
+		// fix the last dashboard task URL
+		tempTask = tasks[tasks.length - 1];
+		tasks[tasks.length - 1] = tempTask.substring(0, tempTask.indexOf("\" class=\"next\""));
 		
 		return tasks;
 	}
