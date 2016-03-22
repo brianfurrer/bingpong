@@ -30,7 +30,15 @@ bp.rewardsDashboard = (function () {
 			}
 			
 			// beyond this point, the account is assumed to be in good standing
-			desktopCreditsToGet = dashboardData.match(/(?:Earn 1 credit per 2 searches on PC (?:or mobile)?, up to )(\d+)(?: credits per day)/)[1];
+			// get the number of desktop credits to get: variant 1
+			if (matchedStrings = dashboardData.match(/(?:Earn 1 credit per 2 searches on PC or mobile, up to )(\d+)( credits per day.)/)) { 
+				desktopCreditsToGet = matchedStrings[1];
+			}
+			
+			// variant 2
+			if (matchedStrings = dashboardData.match(/(?:Earn 1 credit per 2 Bing searches up to )(\d+)( credits a day.)/)) { 
+				desktopCreditsToGet = matchedStrings[1];
+			}
 			
 			// check for the ability to do the monthly bonus
 			if (matchedStrings = dashboardData.match(/(?:Search )(\d+)(?: times this month)/)) { 
@@ -40,7 +48,7 @@ bp.rewardsDashboard = (function () {
 			}
 			
 			// check for the ability to do mobile searches
-			if (matchedString = dashboardData.match(/(?:<span class="title">Mobile search<\/span><span class="desc">Earn 1 credit per 2 Bing searches up to )(\d+)(?: credits a day.)/)) { 
+			if (matchedStrings = dashboardData.match(/(?:<span class="title">Mobile search<\/span><span class="desc">Earn 1 credit per 2 Bing searches up to )(\d+)(?: credits a day.)/)) { 
 				mobileCreditsToGet = matchedStrings[1];
 				callbackOnSuccess(desktopCreditsToGet, mobileCreditsToGet, -1);
 				return true;
