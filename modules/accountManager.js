@@ -370,6 +370,9 @@ bp.accountManager = (function () {
 		}, function () { // log-in successful, but account is blocked
 			bp.settings.enable();
 			bp.status.changeWithTimeout("There was is an issue logging into this account.", "This account is banned.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
+		}, function () { // log-out failed
+			bp.settings.enable();
+			bp.status.changeWithTimeout("There was is an issue logging out of the previous account.", "This is a bug, and will need to be reported to get fixed.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
 		});
 	}
 	
@@ -388,6 +391,9 @@ bp.accountManager = (function () {
 		}, function () { // log-in successful, but account is blocked
 			bp.settings.enable();
 			bp.status.changeWithTimeout("There was is an issue logging into this account.", "This account is banned.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
+		}, function () { // log-out failed
+			bp.settings.enable();
+			bp.status.changeWithTimeout("There was is an issue logging out of the previous account.", "This is a bug, and will need to be reported to get fixed.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
 		});
 	}
 	
