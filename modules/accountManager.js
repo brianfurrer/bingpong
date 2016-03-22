@@ -151,7 +151,7 @@ bp.accountManager = (function () {
 				usernameCell.innerHTML = "<span id=\"accountName" + i + "\">" + username + "</span>&nbsp;&nbsp;&nbsp;";
 				creditsCell.innerHTML = "<center><span id=\"credits" + i + "\">" + creditCount + "</span></center>";
 				optionsCell.innerHTML = "<a href=\"#\" onclick=\"bp.accountManager.launchDashboardForAccountAtIndex(" + i + ");return false;\">Dashboard</a>&nbsp;&nbsp;&nbsp;"
-				optionsCell.innerHTML += "<a href=\"#\" onclick=\"bp.accountManager.launchEmailForAccountAtIndex(" + i + ");return false;\">Outlook</a>&nbsp;&nbsp;&nbsp;";
+				optionsCell.innerHTML += "<a href=\"#\" onclick=\"bp.accountManager.launchOutlookForAccountAtIndex(" + i + ");return false;\">Outlook</a>&nbsp;&nbsp;&nbsp;";
 				optionsCell.innerHTML += "<a href=\"#\" onclick=\"bp.accountManager.removeAccountAtIndex(" + i + ");return false;\">Remove</a>";
 				
 				// check for a license beyond the 5th account
@@ -356,11 +356,39 @@ bp.accountManager = (function () {
 	}
 	
 	accountManager.launchDashboardForAccountAtIndex = function (index) { 
-		bp.accountManager.getAccountAtIndex(index).launchDashboard();
+		var account = bp.accountManager.getAccountAtIndex(index);
+		
+		bp.settings.disable();
+		bp.status.changeText(RUNNING_INDICATOR_NORMAL + " Signing in as " + account.getUsername() + "...", "&nbsp;", "&nbsp;");
+		
+		account.launchDashboard(function () { // log-in successful, dashboard launched
+			bp.settings.enable();
+			bp.status.reset();
+		}, function () { // log-in failed
+			bp.settings.enable();
+			bp.status.changeWithTimeout("There was is an issue logging into this account.", "This account is blocked and most likely needs SMS verification.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
+		}, function () { // log-in successful, but account is blocked
+			bp.settings.enable();
+			bp.status.changeWithTimeout("There was is an issue logging into this account.", "This account is banned.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
+		});
 	}
 	
-	accountManager.launchEmailForAccountAtIndex = function (index) { 
-		bp.accountManager.getAccountAtIndex(index).launchEmail();
+	accountManager.launchOutlookForAccountAtIndex = function (index) { 
+		var account = bp.accountManager.getAccountAtIndex(index);
+		
+		bp.settings.disable();
+		bp.status.changeText(RUNNING_INDICATOR_NORMAL + " Signing in as " + account.getUsername() + "...", "&nbsp;", "&nbsp;");
+		
+		account.launchOutlook(function () { // log-in successful, dashboard launched
+			bp.settings.enable();
+			bp.status.reset();
+		}, function () { // log-in failed
+			bp.settings.enable();
+			bp.status.changeWithTimeout("There was is an issue logging into this account.", "This account is blocked and most likely needs SMS verification.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
+		}, function () { // log-in successful, but account is blocked
+			bp.settings.enable();
+			bp.status.changeWithTimeout("There was is an issue logging into this account.", "This account is banned.", "&nbsp;", bp.status.RESET_TIMEOUT, function () {});
+		});
 	}
 	
 	accountManager.updateAccountWithDashboardData = function (account) { 
