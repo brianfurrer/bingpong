@@ -59,5 +59,21 @@ bp.rewardsDashboard = (function () {
 		});
 	}
 	
+	// NOTE: this uses cached dashboard data
+	rewardsDashboard.getTasks = function () { 
+		var tasks = _dashboardData.split("rewardsapp/redirect?url=");
+		
+		// remove the first element of the above array since it doesn't contain any task info
+		tasks = task.splice(0, 1);
+		
+		// update the urls
+		for (var i = 0, l = tasks.length; i < l; i++) {
+			var tempTask = tasks[i];
+			tasks[i] = "https://www.bing.com/rewardsapp/redirect?url=" + tempTask.substring(0, tempTask.indexOf("\" id=\"")).replace(/&amp;/g, "");
+		}
+		
+		return tasks;
+	}
+	
 	return rewardsDashboard;
 })();

@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 1.0.0-61 (3/22/2016)
+// Current version: 1.0.0-62 (3/22/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -811,70 +811,6 @@ function verifySearches(doMobileSearches, callback) {
 	 	}
 	});
 }
-
-function parseDashboardForTasks(callback) {
-	getDashboardContents(function () {
-		var temp = dashboardData.split("rewardsapp/redirect?url");
-		var temp2 = new Array();
-
-		for (var i = 0; i < temp.length - 1; i++) {
-			temp2[i] = "https://www.bing.com/rewardsapp/redirect?url" + temp[i + 1].substring(temp[i + 1].indexOf("="), temp[i + 1].indexOf("\""));
-			dashboardTaskURLs[i] = (temp2[i].split("amp;")).join("");
-		}
-
-		temp2[temp.length - 1] = "https://www.bing.com/rewardsapp/redirect?url" + temp[temp.length - 1].substring(temp[temp.length - 1].indexOf("="), temp[temp.length - 1].indexOf("\""));
-   		dashboardTaskURLs[temp.length - 1] = (temp2[temp.length - 1].split("amp;")).join("");
-
-   		// re-use temp
-   		temp = new Array();
-
-   		// remove duplicate task URLs
-   		for (var i = 0; i < dashboardTaskURLs.length; i++) {
-   			var alreadyInTemp = false;
-
-   			for (var j = 0; j < temp.length; j++) {
-   				if (dashboardTaskURLs[i].substring(0, 150) == temp[j].substring(0, 150)) {
-   					alreadyInTemp = true;
-   					break;
-   				}
-   			}
-
-   			if (!alreadyInTemp) {
-   				temp[temp.length] = dashboardTaskURLs[i];
-   			}
-   		}
-
-   		// move the elements of temp back into dashboardTaskURLs
-   		dashboardTaskURLs = new Array();
-   		for (var i = 0; i < temp.length; i++) {
-   			dashboardTaskURLs[i] = temp[i];
-   		}
-/*
-   		// tour complete? if not, add it to the list of dashboard tasks
-   		if (dashboardData.indexOf("See how it works") != -1) {
-   			dashboardTaskURLs.push("https://www.bing.com/rewardsapp/redirect?url=%2frewards%2fdashboard&id=sst_welcome1&hash=f22dc588e49db0572ee93fad4bb5d8f0&state=Active&rcid=4&aid=urlreward&bruid=&ml=&rh=");
-   		}
-*/
-   		// remove the trivia task from the list of tasks to do
-   		for (var i = 0; i < dashboardTaskURLs.length; i++) {
-   			if (dashboardTaskURLs[i].indexOf("raid=quiz&amp;") != -1) {
-   				dashboardTaskURLs.splice(i, 1);
-   				break;
-   			}
-   		}
-
-		// remove any completed tasks from the list of tasks to do
-		for (var i = 0; i < dashboardTaskURLs.length; i++) {
-			if (dashboardTaskURLs[i].indexOf("state=Completed") != -1) {
-				dashboardTaskURLs.splice(i, 1);
-			}
-		}
-
-   		// return to caller
-   		callback();
-	});
-}
-
 
 function performDashboardTasks(callback) {
 	dashboardTaskAttemptCount++;
