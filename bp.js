@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 1.0.0-59 (3/22/2016)
+// Current version: 1.0.0-60 (3/22/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -489,80 +489,6 @@ function parseTrendingSearchTerms(callback) {
 		error: function (data) {
 			parseTrendingSearchTerms(callback);
 		}
-	});
-}
-
-function parseDashboardContents(callbackOnSuccess, callbackOnBadAccount) {
-	getDashboardContents(function () {
-		// ban checks
-		if (dashboardData.indexOf("up to 2 credits a day") != -1 ||
-		dashboardData.indexOf("For a limited time you're earning free credits.") != -1 ||
-		dashboardData.indexOf("This isn't a Bing Rewards account.") != -1) {
-			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-			document.getElementById('accountName' + currentAccountIndex).style.color = "#FF0000";
-			document.getElementById('credits' + currentAccountIndex).style.color = "#FF0000";
-			document.getElementById('credits' + currentAccountIndex).innerHTML = "BANNED!!!";
-
-			// continue with the next account
-			callbackOnBadAccount();
-			return;
-		}
-
-		// get the number of credits required to max out the PC search credits for the day
-		if (dashboardData.indexOf("15 credits a day") != -1) {
-			searchCountText = "15 credits a day";
-			creditsToGet = 15;
-		} else if (dashboardData.indexOf("15 credits per day") != -1) {
-			searchCountText = "15 credits per day";
-			creditsToGet = 15;
-		} else if (dashboardData.indexOf("20 credits a day") != -1) {
-			searchCountText = "20 credits a day";
-			creditsToGet = 20;
-		} else if (dashboardData.indexOf("30 credits a day") != -1) {
-			searchCountText = "30 credits a day";
-			creditsToGet = 30;
-		} else if (dashboardData.indexOf("60 credits a day") != -1) {
-			searchCountText = "60 credits a day";
-			creditsToGet = 60;
-		} else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 75 credits") != -1) {
-			searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
-			creditsToGet = 75;
-		} else if (dashboardData.indexOf("Search with Bing on your PC and earn up to 5 times your daily credits") != -1 && data.responseText.indexOf("of 150 credits") != -1) {
-			searchCountText = "Search with Bing on your PC and earn up to 5 times your daily credits";
-			creditsToGet = 150;
-		} else { // fail account
-			document.getElementById('status' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-			document.getElementById('status_ms' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-			document.getElementById('status_dt' + currentAccountIndex).innerHTML = "<i class=\"fa fa-exclamation-triangle\"></i>";
-			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-			document.getElementById('accountName' + currentAccountIndex).style.color = "#FFFF00";
-			document.getElementById('credits' + currentAccountIndex).style.color = "#FFFF00";
-			document.getElementById('credits' + currentAccountIndex).innerHTML = "BLOCKED";
-
-			// continue with the next account
-			callbackOnBadAccount();
-			return;
-		}
-
-		// append " Start with US news." to the searchCountText (v0.20.47)
-		searchCountText += ". Start with US news.";
-
-		// get the number of searches required to get one credit from PC searching
-		numberOfSearchesPerCredit = ((dashboardData.indexOf("PC search</span><span class=\"desc\">Earn 1 credit per 2 Bing searches") != -1) ? 2 : 3);
-
-		// set the number of searches Bing Pong needs to do
-		regularSearchesToPerform = numberOfSearchesPerCredit*creditsToGet;
-
-		// if applicable, fetch the number of credits the account has and update the display
-		if (document.getElementById('multipleAccountsOption').checked) {
-			updateCreditCounter(dashboardData, false);
-		}
-
-		// return to caller
-		callbackOnSuccess();
 	});
 }
 
