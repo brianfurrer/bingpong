@@ -226,5 +226,28 @@ bp.settings = (function () {
 		document.getElementById('runInRandomOrderOption').disabled = true;
 	}
 	
+	settings.enableSearchOptions = function () {
+		document.getElementById('numberOfDesktopSearches').disabled = false;
+
+		if (bp.helperTools.getHelperInstallationStatus()) {
+			document.getElementById('numberOfMobileSearches').disabled = false;
+		}
+	}
+
+	settings.disableSearchOptions = function () {
+		document.getElementById('numberOfDesktopSearches').disabled = true;
+		document.getElementById('numberOfMobileSearches').disabled = true;
+	}
+
+	function disableMobileSearchOption() {
+		document.getElementById('numberOfMobileSearches').disabled = true;
+		document.getElementById('numberOfMobileSearches').value = "------";
+	}
+
+	settings.enterAutoInSearchBoxes = function () {
+		document.getElementById('numberOfDesktopSearches').value = "auto";
+		document.getElementById('numberOfMobileSearches').value = "auto";
+	}
+	
 	return settings;
 })();
