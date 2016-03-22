@@ -1,5 +1,5 @@
 bp.status = (function () { 
-	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v1.0.0-53 (BETA)";
+	var DEFAULT_STATUS_TEXT = "Created by <a href=\"http://www.reddit.com/user/kiefferbp\" target=\"_blank\">/u/kiefferbp</a>. v1.0.0-54 (BETA)";
 	var STATUS_RESET_TIMEOUT = 5;
 	var _statusTimer;
 	

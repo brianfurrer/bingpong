@@ -239,7 +239,7 @@ bp.settings = (function () {
 		document.getElementById('numberOfMobileSearches').disabled = true;
 	}
 
-	function disableMobileSearchOption() {
+	settings.disableMobileSearchOption = function () {
 		document.getElementById('numberOfMobileSearches').disabled = true;
 		document.getElementById('numberOfMobileSearches').value = "------";
 	}
