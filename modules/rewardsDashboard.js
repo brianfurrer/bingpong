@@ -123,5 +123,9 @@ bp.rewardsDashboard = (function () {
 		return monthlyBonusSearchesToGet - monthlyBonusSearchesCompleted;
 	}
 	
+	rewardsDashboard.getNumberOfMissingDashboardTasks = function () { 
+		return bp.rewardsDashboard.getTasks().length; // since getTasks only contains missing tasks
+	}
+	
 	return rewardsDashboard;
 })();

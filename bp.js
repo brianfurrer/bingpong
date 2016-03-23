@@ -1,6 +1,6 @@
 // Source Code for Bing Pong (www.bing-pong.com)
 // Created By Brian Kieffer on 3/24/2013
-// Current version: 1.0.0-65 (3/22/2016)
+// Current version: 1.0.0-66 (3/22/2016)
 
 // constants
 var MS_REQUIRED_TO_SHOW_DOWNLOAD_STATUS = 500;
@@ -834,24 +834,6 @@ function waitForAnIPChange() {
 	}
 
 	fetchNewIPs();
-}
-
-function getNumberOfMissingDashboardTasks(includeTrivia, useCachedDashboardData, callback) {
-	var proceed = function () {
-		var numberOfTasksIncomplete = dashboardData.substring(0, dashboardData.indexOf("Every day ways to earn")).split("check open-check dashboard-sprite").length - 1;
-
-		if (!includeTrivia) {
-			numberOfTasksIncomplete -= dashboardData.substring(0, dashboardData.indexOf("Every day ways to earn")).split("raid=quiz&amp;").length - 1;
-		}
-
-		callback(numberOfTasksIncomplete);
-	};
-
-	if (useCachedDashboardData) {
-		proceed();
-	} else {
-		getDashboardContents(proceed);
-	}
 }
 
 function verifyDashboardTasks(callback) {
