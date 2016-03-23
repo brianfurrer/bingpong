@@ -23,7 +23,7 @@ bp.accountManager = (function () {
 	
 	function _getAccountIndex(account) { 
 		for (var i = 0; i < _accounts.length; i++) { 
-			if (_accounts[i].getUsername() === account.getUsername()) { 
+			if (_accounts[i].equals(account)) { 
 				return i;
 			}
 		}
@@ -82,7 +82,7 @@ bp.accountManager = (function () {
 				var account = new bp.Account(username, password);
 				account.setCreditCount(creditCount);
 				account.setRedeemabilityStatus(isRedeemable);
-				bp.accountManager.addAccount(account);
+				bp.accountManager.addAccountToManager(account);
 
 				if (isEnabled && (i <= bp.licensing.MAX_ACCOUNTS_WITHOUT_LICENSE || (i > bp.licensing.MAX_ACCOUNTS_WITHOUT_LICENSE && bp.licensing.getLicenseStatus()))) { // account is enabled and can be added to the runnable list
 					// add the account to the runnable list
@@ -114,7 +114,7 @@ bp.accountManager = (function () {
 			var creditsHeaderCell = headerRow.insertCell(5);
 			var optionsHeaderCell = headerRow.insertCell(6);
 			
-			cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\" " + (_globalCheckmarkChecked ? "checked" : "") + " " + (disableChanges ? "disabled" : "") + " onclick=\"bp.accountManager.onGlobalCheckmarkChange();\"></center>";
+			cmHeaderCell.innerHTML = "<center><input type=checkbox id=\"globalCheckmark\" " + (_globalCheckmarkChecked ? "checked" : "") + " onclick=\"bp.accountManager.onGlobalCheckmarkChange();\"></center>";
 			dsHeaderCell.innerHTML = "<center><i class=\"fa fa-laptop fa-lg\"></i></center>";
 			msHeaderCell.innerHTML = "<center><i class=\"fa fa-mobile fa-lg\"></i></center>";
 			dtHeaderCell.innerHTML = "<center><i class=\"fa fa-flag fa-lg\"></i></center>";
@@ -123,17 +123,14 @@ bp.accountManager = (function () {
 			optionsHeaderCell.innerHTML = "<center><b>Options</b></center>";
 			
 			// loop through the accounts stored
-			for (var i = 1, accountCount = parseInt(bp.cookies.get("accountCount")); i <= accountCount; i++) { 
-				// get the account's information from cookies
-				var username = bp.cookies.get("username" + i);
-				var password = bp.cookies.get("password" + i);
-				var creditCount = bp.cookies.get("credits" + i);
-				var isEnabled = bp.cookies.get("isEnabled" + i);
+			for (var i = 0, l = _accounts.length; i < l; i++) { 
+				var account = bp.accountManager.getAccountAtIndex(i);
+				var username = account.getUsername();
+				var password = account.getPassword();
+				var creditCount = account.getCreditCount();
+				var isRedeemable = account.getRedeemabilityStatus();
+				var isEnabled = !bp.cookies.get("isEnabled" + (i + 1)) || (bp.cookies.get("isEnabled" + (i + 1)) === "true");
 				
-				// sanitize the credit count and account enable/disable status
-				creditCount = (creditCount && creditCount >= 0) ? creditCount : "N/A";
-				isEnabled = (!isEnabled || isEnabled === "true");
-
 				// populate the rows
 				var row = accountsTable.insertRow(-1);
 				var checkmarkCell = row.insertCell(0);
@@ -229,14 +226,14 @@ bp.accountManager = (function () {
 		bp.cookies.set("username" + newAccountCount, account.getUsername());
 		bp.cookies.set("password" + newAccountCount, account.getPassword());
 		bp.cookies.set("isEnabled" + newAccountCount, true);
-		bp.cookies.set("credits" + i, account.getCreditCount());
+		bp.cookies.set("credits" + newAccountCount, account.getCreditCount());
 		bp.cookies.set("accountCount", newAccountCount);
 		
 		// update the account manager display
 		bp.accountManager.updateDisplay();
 	}
 	
-	accountManager.addAccountInManager = function (account, verifyBeforeAdding) { 
+	accountManager.addAccountToManager = function (account, verifyBeforeAdding) { 
 		if (verifyBeforeAdding) { 
 			bp.settings.disable(true);
 			bp.accountManager.disable();
