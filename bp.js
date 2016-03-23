@@ -734,31 +734,6 @@ function performSearchesLegacy(numberOfSearches, callback) {
 	}
 }
 
-function getSearchCreditCount(doMobileSearches, useCachedDashboardData, callback) {
-	var proceed = function () {
-		if (doMobileSearches) {
-			if (dashboardData.indexOf("Earn 1 credit per 2 Bing searches up to 10 credits a day.</span></span><div class=\"check-wrapper tile-height\"><div class=\"check close-check dashboard-sprite\"></div></div><div class=\"progress\">10 credits") == -1) { // mobile searches are incomplete
-				var tempString = "Earn 1 credit per 2 Bing searches up to 10 credits a day.</span></span><div class=\"check-wrapper tile-height\"><div class=\"check open-check dashboard-sprite\"></div></div><div class=\"progress\">";
-				callback(false, dashboardData.substring(dashboardData.indexOf(tempString) + 191, dashboardData.indexOf(tempString) + 192));
-			} else { // mobile searches are complete
-				callback(true, 10);
-			}
-		} else {
-			if (dashboardData.indexOf("<div class=\"progress\">" + creditsToGet + " credits") == -1) { // PC searches are incomplete
-				callback(false, dashboardData.substring(dashboardData.indexOf(searchCountText) + 134 + searchCountText.length, dashboardData.indexOf(searchCountText) + 136 + searchCountText.length));
-			} else { // PC searches are complete
-				callback(true, creditsToGet);
-			}
-		}
-	};
-
-	if (useCachedDashboardData) {
-		proceed();
-	} else {
-		getDashboardContents(proceed);
-	}
-}
-
 function verifySearches(doMobileSearches, callback) {
 	bp.status.change("<img src=\"loader.gif\" width=\"16\" height=\"16\"></img> Checking for any missing search credits...", "&nbsp;", "&nbsp;");
 

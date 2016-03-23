@@ -79,5 +79,42 @@ bp.rewardsDashboard = (function () {
 		return tasks;
 	}
 	
+	rewardsDashboard.getNumberOfMissingDesktopSearchCredits = function () {
+		// ignore the dashboard data before the "Every day ways to earn" section
+		var data = _dashboardData.split("Every day ways to earn")[1];
+		
+		if (data.indexOf("<div class=\"progress\">15 credits") === -1) { // desktop searches are incomplete
+			return 15 - parseInt(data.match(/(?:<div class="progress">)(\d+)(?: of 15 credits<\/div>)/)[1]);
+		} else { // desktop searches are complete
+			return 0;
+		}
+	}
+	
+	rewardsDashboard.getNumberOfMissingMobileSearchCredits = function () { 
+		// ignore the dashboard data before the "Every day ways to earn" section
+		var data = _dashboardData.split("Every day ways to earn")[1];
+		
+		if (data.indexOf("<div class=\"progress\">10 credits") === -1) { // mobile searches are incomplete
+			return 10 - parseInt(data.match(/(?:<div class="progress">)(\d+)(?: of 10 credits<\/div>)/)[1]);
+		} else { // mobile searches are complete
+			return 0;
+		}
+	}
+	
+	rewardsDashboard.getNumberOfMissingMonthlyBonusSearches = function () { 
+		// ignore the dashboard data before the "Every day ways to earn" section
+		var data = _dashboardData.split("Every day ways to earn")[1];
+
+		// calculate the number of monthly searches needed to obtain the bonus
+		var monthlyBonusSearchesToGet = parseInt(data.match(/(?:Search )(\d+)(?: times this month)/)[1]);
+		
+		// calculate the number of monthly searches that have already been done
+		var re = new RegExp("(?:<div class=\"progress\">)(\\d+)(?: of " + monthlyBonusSearchesToGet + " searches<\\/div>)", "i");
+		var monthlyBonusSearchesCompleted = parseInt(data.match(re)[1]);
+		
+		// return the difference
+		return monthlyBonusSearchesToGet - monthlyBonusSearchesCompleted;
+	}
+	
 	return rewardsDashboard;
 })();
