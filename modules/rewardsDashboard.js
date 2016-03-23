@@ -78,8 +78,8 @@ bp.rewardsDashboard = (function () {
 		
 		// remove any completed tasks from the list of tasks to do
  -		for (var i = 0, l = tasks.length; i < l; i++) {
- -			if (dashboardTaskURLs[i].indexOf("state=Completed") !== -1) {
- -				dashboardTaskURLs.splice(i, 1);
+ -			if (tasks[i].indexOf("state=Completed") !== -1) {
+ -				tasks.splice(i, 1);
  -			}
  -		}
  
